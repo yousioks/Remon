@@ -15,7 +15,8 @@ $$;
 GRANT ALL PRIVILEGES ON DATABASE remon_db TO remon_user;
 ALTER DATABASE remon_db OWNER TO remon_user;
 
--- ПользователиCREATE TABLE IF NOT EXISTS users (
+-- Пользователи
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255),
