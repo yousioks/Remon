@@ -1,0 +1,26 @@
+# Автоматическая нормализация переносов строк
+* text=auto
+
+# Shell-скрипты всегда LF (иначе не запустятся на Linux)
+*.sh text eol=lf
+
+# Конфиги
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.sql text eol=lf
+*.conf text eol=lf
+
+# Бинарные файлы — без изменений
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
