@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: 'Remon Developer — Промышленно-Строительный Холдинг | Инновации Сибири',
   description: 'Крупнейший застройщик Сибири. Квартиры бизнес-класса, умные технологии, архитектура будущего в Новосибирске, Тюмени и Омске.',
   keywords: 'застройщик, квартиры, Омск, Тюмень, Новосибирск, новостройки, Remon',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   openGraph: {
     title: 'Remon Developer',
     description: 'Архитектура будущего в Сибири',
@@ -15,7 +20,6 @@ export const metadata: Metadata = {
     type: 'website',
   },
 };
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
