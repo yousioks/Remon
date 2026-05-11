@@ -23,19 +23,23 @@ mkdir -p certbot/conf certbot/www
 if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   echo "🔐 Получаем SSL-сертификат Let's Encrypt..."
 
-  # Запускаем nginx с HTTP-only конфигом (без SSL — сертификатов ещё нет)
-  docker run --rm -d \
-    --name nginx-certbot-init \
-    -p 80:80 \
-    -v "$(pwd)/nginx/nginx.http.conf:/etc/nginx/nginx.conf:ro" \
-    -v "$(pwd)/certbot/www:/var/www/certbot:ro" \
-    nginx:alpine
+  # Останавливаем всё что могло остаться с прошлого запуска
+  docker compose -f docker-compose.prod.yml down 2>/dev/null || true
 
-  # Ждём пока nginx поднимется
-  sleep 3
+  # Подменяем nginx.conf на HTTP-only версию (без SSL — сертификатов ещё нет)
+  cp nginx/nginx.conf nginx/nginx.conf.bak
+  cp nginx/nginx.http.conf nginx/nginx.conf
 
-  # Получаем сертификат
+  # Запускаем только nginx (он теперь без SSL — стартует нормально)
+  docker compose -f docker-compose.prod.yml up -d nginx
+
+  # Ждём пока nginx поднимется и начнёт слушать порт 80
+  echo "⏳ Ждём запуска nginx..."
+  sleep 5
+
+  # Получаем сертификат через webroot
   docker run --rm \
+    --network remon_default \
     -v "$(pwd)/certbot/conf:/etc/letsencrypt" \
     -v "$(pwd)/certbot/www:/var/www/certbot" \
     certbot/certbot certonly \
@@ -47,8 +51,12 @@ if [ ! -d "certbot/conf/live/raemon.ru" ]; then
     -d raemon.ru \
     -d www.raemon.ru
 
+  # Восстанавливаем полный nginx.conf с SSL
+  cp nginx/nginx.conf.bak nginx/nginx.conf
+  rm nginx/nginx.conf.bak
+
   # Останавливаем временный nginx
-  docker stop nginx-certbot-init || true
+  docker compose -f docker-compose.prod.yml down
 
   echo "✅ SSL-сертификат получен!"
 fi
