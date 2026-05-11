@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { ArrowRight, ChevronDown, Plus, Minus } from 'lucide-react';
+import { ArrowRight, ChevronDown, Plus, Minus, Phone } from 'lucide-react';
 
 // ─── Mortgage Calculator ───────────────────────────────────────────────────
 function MortgageCalc() {
