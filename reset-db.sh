@@ -19,9 +19,16 @@ if [[ "$1" == "--soft" ]]; then
   echo "⏳ Ждём запуска PostgreSQL (15 сек)..."
   sleep 15
 
-  echo "🔑 Меняем пароль пользователя ${DB_USER}..."
-  docker compose exec db psql -U postgres -c "ALTER USER ${DB_USER} WITH PASSWORD '${DB_PASS}';" 2>/dev/null \
-    || docker compose exec db psql -U "${DB_USER}" -d "${DB_NAME}" -c "ALTER USER ${DB_USER} WITH PASSWORD '${DB_PASS}';"
+  echo "🔑 Меняем пароль пользователя ${DB_USER} через trust-режим..."
+  # Временно отключаем аутентификацию, чтобы не зависеть от текущего пароля в БД
+  docker compose exec db sed -i 's/scram-sha-256/trust/g' /var/lib/postgresql/data/pg_hba.conf
+  docker compose exec db psql -U "${DB_USER}" -d "${DB_NAME}" -c "SELECT pg_reload_conf();" 2>/dev/null || true
+  sleep 2
+  docker compose exec db psql -U "${DB_USER}" -d "${DB_NAME}" -c "ALTER USER ${DB_USER} WITH PASSWORD '${DB_PASS}';"
+  # Возвращаем scram-sha-256
+  docker compose exec db sed -i 's/trust/scram-sha-256/g' /var/lib/postgresql/data/pg_hba.conf
+  docker compose exec db psql -U "${DB_USER}" -d "${DB_NAME}" -c "SELECT pg_reload_conf();" 2>/dev/null || true
+  sleep 1
 
   echo "📋 Применяем init.sql (CREATE TABLE IF NOT EXISTS — безопасно)..."
   docker compose exec -T db psql -U "${DB_USER}" -d "${DB_NAME}" < init.sql
