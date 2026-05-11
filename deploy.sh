@@ -37,9 +37,15 @@ if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   echo "⏳ Ждём запуска nginx..."
   sleep 5
 
+  # Проверяем что nginx слушает порт 80
+  echo "🔍 Проверяем доступность порта 80..."
+  if ! curl -s --max-time 5 http://localhost/.well-known/acme-challenge/test > /dev/null 2>&1; then
+    echo "⚠️  Порт 80 не отвечает, проверяем логи nginx..."
+    docker compose -f docker-compose.prod.yml logs nginx
+  fi
+
   # Получаем сертификат через webroot
   docker run --rm \
-    --network remon_default \
     -v "$(pwd)/certbot/conf:/etc/letsencrypt" \
     -v "$(pwd)/certbot/www:/var/www/certbot" \
     certbot/certbot certonly \
