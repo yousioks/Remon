@@ -36,9 +36,11 @@ function startServer() {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Доверяем первому прокси (nginx) — необходимо для корректной работы rate-limit за reverse proxy
+app.set('trust proxy', 1);
+
 // Безопасность заголовков
 app.use(helmet({ contentSecurityPolicy: false }));
-
 // Gzip-сжатие ответов
 app.use(compression());
 
