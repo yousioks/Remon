@@ -60,15 +60,15 @@ const generalLimiter = rateLimit({
   message: { error: 'Слишком много запросов, попробуйте позже' },
 });
 
-// Строгий лимит для авторизации: 10 попыток за 15 минут
+// Строгий лимит для авторизации: 50 попыток за 15 минут, успешные не считаются
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 50,
+  skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Слишком много попыток входа, попробуйте через 15 минут' },
 });
-
 app.use('/api/', generalLimiter);
 // Публичные маршруты
 app.use('/api/auth', authLimiter, authRoutes);

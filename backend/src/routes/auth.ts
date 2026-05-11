@@ -260,10 +260,9 @@ router.get('/vk/callback', async (req: Request, res: Response): Promise<void> =>
       avatar_url: vkUser.photo_200,
     });
 
-    res.redirect(`${FRONTEND_URL}/cabinet?token=${accessToken}&refresh=${refreshToken}`);
+    res.redirect(`${FRONTEND_URL}/login?token=${accessToken}&refresh=${refreshToken}&role=${user.role}`);
   } catch (err) {
-    console.error('VK OAuth error:', err);
-    res.redirect(`${FRONTEND_URL}/login?error=vk_auth_failed`);
+    console.error('VK OAuth error:', err);    res.redirect(`${FRONTEND_URL}/login?error=vk_auth_failed`);
   }
 });
 
@@ -324,10 +323,9 @@ router.get('/yandex/callback', async (req: Request, res: Response): Promise<void
         : undefined,
     });
 
-    res.redirect(`${FRONTEND_URL}/cabinet?token=${accessToken}&refresh=${refreshToken}`);
+    res.redirect(`${FRONTEND_URL}/login?token=${accessToken}&refresh=${refreshToken}&role=${user.role}`);
   } catch (err) {
-    console.error('Yandex OAuth error:', err);
-    res.redirect(`${FRONTEND_URL}/login?error=yandex_auth_failed`);
+    console.error('Yandex OAuth error:', err);    res.redirect(`${FRONTEND_URL}/login?error=yandex_auth_failed`);
   }
 });
 

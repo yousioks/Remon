@@ -17,13 +17,12 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   loginWithToken: (accessToken: string, refreshToken: string) => Promise<void>;
   register: (data: { email: string; password: string; full_name?: string; phone?: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
-}
-const AuthContext = createContext<AuthContextType | null>(null);
+}const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -51,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     const data = await apiPost<{ user: User; accessToken: string; refreshToken: string }>(
       '/api/auth/login',
       { email, password }
@@ -59,8 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
     setUser(data.user);
+    return data.user;
   };
-
   // Вход через OAuth-токен (VK, Яндекс, Telegram)
   const loginWithToken = async (accessToken: string, refreshToken: string) => {
     localStorage.setItem('accessToken', accessToken);
