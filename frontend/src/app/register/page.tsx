@@ -221,12 +221,10 @@ export default function RegisterPage() {
             <TelegramLoginButton apiUrl={API_URL} />
           </div>
         </div>
-        </div>
       </div>
     </main>
   );
 }
-
 // Telegram Login Widget — виджет поверх нашей иконки
 function TelegramLoginButton({ apiUrl }: { apiUrl: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
