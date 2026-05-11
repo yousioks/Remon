@@ -40,34 +40,31 @@ export default function Header() {
     router.push('/');
   };
 
-  // Шапка всегда белая — без зависимости от скролла и страницы  return (
+  return (
     <>
-      {/* Top marquee */}
-      <div className="marquee-container border-b border-white/10 z-[200] relative">
-        <div className="marquee-content">
-          {[
-            '⚡ СУБСИДИРОВАННАЯ ИПОТЕКА 0.1% ДЛЯ IT',
-            '🏠 TRADE-IN: ОБМЕН КВАРТИРЫ ЗА 24 ЧАСА',
-            '🎁 КЛАДОВАЯ В ПОДАРОК ПРИ ПОКУПКЕ 3-К',
-            '🔥 СТАРТ ПРОДАЖ «КВАРТАЛЫ КАРБЫШЕВА» В ОМСКЕ',
-            '⭐ ДЕВЕЛОПЕР №7 В СИБИРИ',
-            '⚡ СУБСИДИРОВАННАЯ ИПОТЕКА 0.1% ДЛЯ IT',
-            '🏠 TRADE-IN: ОБМЕН КВАРТИРЫ ЗА 24 ЧАСА',
-            '🎁 КЛАДОВАЯ В ПОДАРОК ПРИ ПОКУПКЕ 3-К',
-            '🔥 СТАРТ ПРОДАЖ «КВАРТАЛЫ КАРБЫШЕВА» В ОМСКЕ',
-            '⭐ ДЕВЕЛОПЕР №7 В СИБИРИ',
-          ].map((item, i) => (
-            <div key={i} className="marquee-item">{item}</div>
-          ))}
+      {/* Main header — всегда белый, фиксированный размер */}
+      <header className="fixed top-0 left-0 w-full z-[100] bg-white shadow-md border-b border-gray-200 h-[106px]">
+        {/* Top marquee */}
+        <div className="marquee-container border-b border-gray-200 h-[36px] flex items-center overflow-hidden">
+          <div className="marquee-content">
+            {[
+              '⚡ СУБСИДИРОВАННАЯ ИПОТЕКА 0.1% ДЛЯ IT',
+              '🏠 TRADE-IN: ОБМЕН КВАРТИРЫ ЗА 24 ЧАСА',
+              '🎁 КЛАДОВАЯ В ПОДАРОК ПРИ ПОКУПКЕ 3-К',
+              '🔥 СТАРТ ПРОДАЖ «КВАРТАЛЫ КАРБЫШЕВА» В ОМСКЕ',
+              '⭐ ДЕВЕЛОПЕР №7 В СИБИРИ',
+              '⚡ СУБСИДИРОВАННАЯ ИПОТЕКА 0.1% ДЛЯ IT',
+              '🏠 TRADE-IN: ОБМЕН КВАРТИРЫ ЗА 24 ЧАСА',
+              '🎁 КЛАДОВАЯ В ПОДАРОК ПРИ ПОКУПКЕ 3-К',
+              '🔥 СТАРТ ПРОДАЖ «КВАРТАЛЫ КАРБЫШЕВА» В ОМСКЕ',
+              '⭐ ДЕВЕЛОПЕР №7 В СИБИРИ',
+            ].map((item, i) => (
+              <div key={i} className="marquee-item">{item}</div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Main header — всегда белый */}
-      <header className="fixed top-[36px] left-0 w-full z-[100] bg-white shadow-sm border-b border-gray-100 h-[70px]">
-        <div className="container-fluid h-full flex justify-between items-center">
-
-          {/* Logo */}
-          <Link href="/" className="text-3xl font-black tracking-tighter uppercase z-50">
+        <div className="container-fluid h-[70px] flex flex-col justify-center">          {/* Logo */}          <Link href="/" className="text-3xl font-black tracking-tighter uppercase z-50">
             <span className="text-black">
               REMON<span className="text-remon-red">.</span>
             </span>
@@ -205,7 +202,5 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Spacer только для marquee-строки (36px) — без дополнительной белой линии */}
-      <div className="h-[36px]" style={{ visibility: 'hidden', pointerEvents: 'none' }} />    </>
-  );
-}
+    </>
+  );}

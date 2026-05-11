@@ -264,7 +264,6 @@ export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Header />
-
       {/* ── HERO ── */}
       <section className="relative h-screen min-h-[700px] flex items-center bg-black overflow-hidden">
         <div className="absolute inset-0 z-0">

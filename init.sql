@@ -2,21 +2,10 @@
 -- Remon Developer — Инициализация базы данных
 -- ============================================================
 
--- Создаём роль если не существует (на случай пересоздания контейнера)
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'remon_user') THEN
-    CREATE ROLE remon_user WITH LOGIN PASSWORD 'remon_pass';
-  END IF;
-END
-$$;
+-- Права уже выданы через POSTGRES_USER в docker-compose
+-- remon_user является владельцем remon_db
 
--- Даём права на базу данных
-GRANT ALL PRIVILEGES ON DATABASE remon_db TO remon_user;
-ALTER DATABASE remon_db OWNER TO remon_user;
-
--- Пользователи
-CREATE TABLE IF NOT EXISTS users (
+-- ПользователиCREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255),
