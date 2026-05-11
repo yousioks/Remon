@@ -56,6 +56,10 @@ services:
       - YANDEX_CLIENT_SECRET=${YANDEX_CLIENT_SECRET:-}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_BOT_NAME=${NEXT_PUBLIC_TELEGRAM_BOT_NAME:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@raemon.ru}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - RESIDENT_EMAIL=${RESIDENT_EMAIL:-resident@raemon.ru}
+      - RESIDENT_PASSWORD=${RESIDENT_PASSWORD:-user123}
     depends_on:
       db:
         condition: service_healthy

@@ -128,29 +128,33 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 -- Начальные данные
 -- ============================================================
 
--- Администратор (пароль: admin123)
+-- Администратор
+-- Пароль задаётся через ENV: ADMIN_PASSWORD (по умолчанию: admin123)
+-- Хэш обновляется автоматически при старте бэкенда (src/seed.ts)
+-- Хэш ниже соответствует паролю "admin123" (bcrypt, cost=10)
 INSERT INTO users (email, password_hash, full_name, phone, role, status)
 VALUES (
   'admin@raemon.ru',
-  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh3y',
   'Администратор Remon',
   '+7 (3812) 20-30-40',
   'admin',
   'resident_business'
 ) ON CONFLICT (email) DO NOTHING;
 
--- Тестовый резидент (пароль: user123)
+-- Тестовый резидент
+-- Пароль задаётся через ENV: RESIDENT_PASSWORD (по умолчанию: user123)
+-- Хэш обновляется автоматически при старте бэкенда (src/seed.ts)
+-- Хэш ниже соответствует паролю "user123" (bcrypt, cost=10)
 INSERT INTO users (email, password_hash, full_name, phone, role, status)
 VALUES (
   'resident@raemon.ru',
-  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW',
   'Иванов Иван Иванович',
   '+7 (913) 123-45-67',
   'user',
   'resident_premium'
-) ON CONFLICT (email) DO NOTHING;
-
--- Проекты
+) ON CONFLICT (email) DO NOTHING;-- Проекты
 INSERT INTO projects (name, city, class, address, description, price_from, price_to, deadline, image_url)
 VALUES
   (

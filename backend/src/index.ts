@@ -14,7 +14,7 @@ import newsRoutes from './routes/news';
 import projectsRoutes from './routes/projects';
 import adminRoutes from './routes/admin';
 import debugRoutes from './routes/debug';
-
+import { seedUsers } from './seed';
 dotenv.config();
 
 // Кластеризация: используем все CPU-ядра в production
@@ -87,7 +87,12 @@ app.get('/', (_req, res) => {
   res.json({ message: 'Remon Developer API v1.0', pid: process.pid });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`✅ Worker ${process.pid} запущен на порту ${PORT}`);
-});
-}
+  // Обновляем пароли системных пользователей из ENV при каждом старте
+  try {
+    await seedUsers();
+  } catch (err) {
+    console.error('[seed] Ошибка обновления пользователей:', err);
+  }
+});}

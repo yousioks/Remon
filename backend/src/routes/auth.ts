@@ -332,11 +332,17 @@ router.get('/yandex/callback', async (req: Request, res: Response): Promise<void
 });
 
 // ─── Telegram OAuth ──────────────────────────────────────────────────────────
-// Telegram Login Widget отправляет данные на этот endpoint
+// GET /api/auth/telegram — информационный endpoint (Telegram Widget иногда делает GET)
+router.get('/telegram', (_req: Request, res: Response) => {
+  res.json({
+    method: 'POST',
+    description: 'Telegram Login Widget endpoint. Use POST with { id, first_name, last_name, username, photo_url, auth_date, hash }',
+  });
+});
+
 // POST /api/auth/telegram
 // Body: { id, first_name, last_name, username, photo_url, auth_date, hash }
-router.post('/telegram', async (req: Request, res: Response): Promise<void> => {
-  // TODO: Вставьте токен вашего Telegram-бота в переменную окружения TELEGRAM_BOT_TOKEN
+router.post('/telegram', async (req: Request, res: Response): Promise<void> => {  // TODO: Вставьте токен вашего Telegram-бота в переменную окружения TELEGRAM_BOT_TOKEN
   const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
   if (!BOT_TOKEN) {
