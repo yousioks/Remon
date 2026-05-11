@@ -31,7 +31,7 @@ if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   cp nginx/nginx.http.conf nginx/nginx.conf
 
   # Запускаем только nginx (он теперь без SSL — стартует нормально)
-  docker compose -f docker-compose.prod.yml up -d nginx
+  docker compose -f docker-compose.prod.yml up -d nginx certbot
 
   # Ждём пока nginx поднимется и начнёт слушать порт 80
   echo "⏳ Ждём запуска nginx..."
@@ -42,6 +42,9 @@ if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   if ! curl -s --max-time 5 http://localhost/.well-known/acme-challenge/test > /dev/null 2>&1; then
     echo "⚠️  Порт 80 не отвечает, проверяем логи nginx..."
     docker compose -f docker-compose.prod.yml logs nginx
+    echo "⚠️  Проверяем статус контейнеров..."
+    docker compose -f docker-compose.prod.yml ps
+    exit 1
   fi
 
   # Получаем сертификат через webroot
