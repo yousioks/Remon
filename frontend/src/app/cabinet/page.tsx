@@ -192,6 +192,13 @@ function MyObjects({ apartments }: { apartments: UserApartment[] }) {
 // ─── Cameras ───────────────────────────────────────────────────────────────
 function Cameras({ cameras }: { cameras: CameraItem[] }) {
   const [active, setActive] = useState<CameraItem | null>(cameras[0] || null);
+  const [currentTime, setCurrentTime] = useState('');
+  useEffect(() => {
+    const fmt = () => new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    setCurrentTime(fmt());
+    const timer = setInterval(() => setCurrentTime(fmt()), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (cameras.length === 0) {
     return (
@@ -201,7 +208,6 @@ function Cameras({ cameras }: { cameras: CameraItem[] }) {
       </div>
     );
   }
-
   return (
     <div className="space-y-6">
       <h3 className="text-2xl font-black uppercase tracking-tighter">Камеры онлайн</h3>
@@ -223,9 +229,8 @@ function Cameras({ cameras }: { cameras: CameraItem[] }) {
                     LIVE
                   </div>
                   <div className="bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-lg">
-                    {new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
+                    {currentTime}
+                  </div>                </div>
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                   <div>
                     <p className="text-white font-black text-lg">{active.name}</p>
@@ -496,10 +501,16 @@ function Chat({ userId }: { userId: number }) {
 // ─── Profile Settings ──────────────────────────────────────────────────────
 function ProfileSettings() {
   const { user, refreshUser } = useAuth();
-  const [form, setForm] = useState({ full_name: user?.full_name || '', phone: user?.phone || '' });
+  const [form, setForm] = useState({ full_name: '', phone: '' });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // Синхронизируем форму с данными пользователя после загрузки
+  useEffect(() => {
+    if (user) {
+      setForm({ full_name: user.full_name || '', phone: user.phone || '' });
+    }
+  }, [user]);
   const save = async () => {
     setSaving(true);
     try {

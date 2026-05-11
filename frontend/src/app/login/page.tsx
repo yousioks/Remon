@@ -233,16 +233,26 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
   );
 }
 
-// Telegram Login Widget — правильная реализация через data-onauth callback
+// Telegram Login Widget — виджет поверх нашей иконки
 function TelegramLoginButton({ apiUrl }: { apiUrl: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { loginWithToken } = useAuth();
   const [error, setError] = useState('');
+  const [widgetLoaded, setWidgetLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME;
+
+  // Предотвращаем hydration mismatch — рендерим виджет только на клиенте
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'YOUR_BOT_NAME';
-
+    if (!mounted || !botName || !containerRef.current) return;
+    // Уже встроен
+    if (containerRef.current.childElementCount > 0) return;
     // Глобальный callback, который вызывает Telegram Widget после авторизации
     (window as unknown as Record<string, unknown>).onTelegramAuth = async (tgUser: Record<string, string>) => {
       try {
@@ -258,7 +268,6 @@ function TelegramLoginButton({ apiUrl }: { apiUrl: string }) {
         }
         const data = await res.json();
         await loginWithToken(data.accessToken, data.refreshToken);
-        // Редирект: admin → /admin, остальные → /cabinet
         if (data.user?.role === 'admin') {
           router.push('/admin');
         } else {
@@ -269,33 +278,59 @@ function TelegramLoginButton({ apiUrl }: { apiUrl: string }) {
       }
     };
 
-    // Встраиваем виджет в контейнер
-    if (containerRef.current && containerRef.current.childElementCount === 0) {
-      const script = document.createElement('script');
-      script.src = 'https://telegram.org/js/telegram-widget.js?22';
-      script.setAttribute('data-telegram-login', botName);
-      script.setAttribute('data-size', 'medium');
-      script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-      script.setAttribute('data-request-access', 'write');
-      script.async = true;
-      containerRef.current.appendChild(script);
-    }
+    const script = document.createElement('script');
+    script.src = 'https://telegram.org/js/telegram-widget.js?22';
+    script.setAttribute('data-telegram-login', botName);
+    script.setAttribute('data-size', 'large');
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+    script.setAttribute('data-request-access', 'write');
+    script.async = true;
+    script.onload = () => setWidgetLoaded(true);
+    containerRef.current.appendChild(script);
 
     return () => {
       delete (window as unknown as Record<string, unknown>).onTelegramAuth;
     };
-  }, [apiUrl, loginWithToken, router]);
+  }, [mounted, apiUrl, botName, loginWithToken, router]);
+
+  // До монтирования на клиенте — статичная заглушка (избегаем hydration mismatch)
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center py-3 border border-gray-100 rounded-xl">
+        <TelegramIcon />
+      </div>
+    );
+  }
+
+  // Если имя бота не задано — показываем заглушку
+  if (!botName) {    return (
+      <div
+        className="flex items-center justify-center py-3 border border-gray-100 rounded-xl opacity-40 cursor-not-allowed"
+        title="Telegram не настроен"
+      >
+        <TelegramIcon />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Обёртка для виджета Telegram — скрываем стандартную кнопку, показываем свою */}
-      <div className="relative flex items-center justify-center border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all overflow-hidden" style={{ minHeight: 48 }}>
-        {/* Наша иконка поверх */}
-        <span className="pointer-events-none absolute z-10 flex items-center justify-center w-full h-full">
+    <div className="flex flex-col items-center col-span-1">
+      {/* Кнопка: наша иконка видна всегда, виджет поверх неё прозрачный */}
+      <div
+        className="relative flex items-center justify-center w-full py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all overflow-hidden cursor-pointer"
+        style={{ minHeight: 48 }}
+        title="Войти через Telegram"
+      >
+        {/* Иконка — всегда видна */}
+        <span className="pointer-events-none z-10 flex items-center justify-center">
           <TelegramIcon />
         </span>
-        {/* Виджет Telegram — прозрачный, поверх иконки для клика */}
-        <div ref={containerRef} className="opacity-0 absolute inset-0 flex items-center justify-center" style={{ minWidth: 48 }} />
+        {/* Виджет Telegram — прозрачный, поверх для клика */}
+        <div
+          ref={containerRef}
+          className="absolute inset-0 flex items-center justify-center overflow-hidden"
+          style={{ opacity: widgetLoaded ? 0.01 : 0 }}
+        />
       </div>
       {error && <p className="text-red-500 text-xs mt-1 text-center">{error}</p>}
     </div>
