@@ -30,14 +30,17 @@ if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   sleep 5
 
   # Получаем сертификат
-  docker compose -f docker-compose.prod.yml run --rm certbot certonly \
-    --webroot \
-    --webroot-path=/var/www/certbot \
-    --email admin@raemon.ru \
-    --agree-tos \
-    --no-eff-email \
-    -d raemon.ru \
-    -d www.raemon.ru
+    docker run --rm \
+      -v /var/www/remon/certbot/conf:/etc/letsencrypt \
+      -v /var/www/remon/certbot/www:/var/www/certbot \
+      certbot/certbot certonly \
+      --webroot \
+      --webroot-path=/var/www/certbot \
+      --email admin@raemon.ru \
+      --agree-tos \
+      --no-eff-email \
+      -d raemon.ru \
+      -d www.raemon.ru
 
   echo "✅ SSL-сертификат получен!"
 fi

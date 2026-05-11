@@ -44,17 +44,18 @@ services:
       - "5000"
     environment:
       - PORT=5000
-      - DATABASE_URL=postgresql://remon_user:remon_pass@db:5432/remon_db
-      - JWT_SECRET=remon_super_secret_jwt_key_2025
-      - JWT_REFRESH_SECRET=remon_refresh_secret_key_2025
+      - DATABASE_URL=${DATABASE_URL:-postgresql://remon_user:remon_pass@db:5432/remon_db}
+      - JWT_SECRET=${JWT_SECRET:-remon_super_secret_jwt_key_2025}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-remon_refresh_secret_key_2025}
       - NODE_ENV=production
-      - FRONTEND_URL=https://raemon.ru
-      - OAUTH_REDIRECT_BASE=https://raemon.ru
-      - VK_APP_ID=YOUR_VK_APP_ID
-      - VK_APP_SECRET=YOUR_VK_APP_SECRET
-      - YANDEX_CLIENT_ID=YOUR_YANDEX_CLIENT_ID
-      - YANDEX_CLIENT_SECRET=YOUR_YANDEX_CLIENT_SECRET
-      - TELEGRAM_BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
+      - FRONTEND_URL=${FRONTEND_URL:-https://raemon.ru}
+      - OAUTH_REDIRECT_BASE=${OAUTH_REDIRECT_BASE:-https://raemon.ru}
+      - VK_APP_ID=${VK_APP_ID:-}
+      - VK_APP_SECRET=${VK_APP_SECRET:-}
+      - YANDEX_CLIENT_ID=${YANDEX_CLIENT_ID:-}
+      - YANDEX_CLIENT_SECRET=${YANDEX_CLIENT_SECRET:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_BOT_NAME=${NEXT_PUBLIC_TELEGRAM_BOT_NAME:-}
     depends_on:
       db:
         condition: service_healthy
@@ -66,22 +67,20 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=remon_user
-      - POSTGRES_PASSWORD=remon_pass
-      - POSTGRES_DB=remon_db
-      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
-      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+      - POSTGRES_USER=${POSTGRES_USER:-remon_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-remon_pass}
+      - POSTGRES_DB=${POSTGRES_DB:-remon_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U remon_user -d remon_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-remon_user} -d ${POSTGRES_DB:-remon_db}"]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 15s
 
 volumes:
   postgres_data:

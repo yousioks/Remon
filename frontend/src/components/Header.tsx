@@ -64,7 +64,9 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="container-fluid h-[70px] flex flex-col justify-center">          {/* Logo */}          <Link href="/" className="text-3xl font-black tracking-tighter uppercase z-50">
+        <div className="container-fluid h-[70px] flex flex-row items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="text-3xl font-black tracking-tighter uppercase z-50 shrink-0">
             <span className="text-black">
               REMON<span className="text-remon-red">.</span>
             </span>

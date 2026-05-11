@@ -5,7 +5,8 @@
 -- Права уже выданы через POSTGRES_USER в docker-compose
 -- remon_user является владельцем remon_db
 
--- ПользователиCREATE TABLE IF NOT EXISTS users (
+-- Пользователи
+CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255),
@@ -113,6 +114,16 @@ CREATE TABLE IF NOT EXISTS sessions (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Токены сброса пароля через Telegram
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  token VARCHAR(64) UNIQUE NOT NULL,
+  telegram_id VARCHAR(50),
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT NOW()
+);
 -- ============================================================
 -- Начальные данные
 -- ============================================================
