@@ -23,24 +23,32 @@ mkdir -p certbot/conf certbot/www
 if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   echo "🔐 Получаем SSL-сертификат Let's Encrypt..."
 
-  # Запускаем nginx только для HTTP (для верификации домена)
-  docker compose -f docker-compose.prod.yml up -d nginx certbot
+  # Запускаем nginx с HTTP-only конфигом (без SSL — сертификатов ещё нет)
+  docker run --rm -d \
+    --name nginx-certbot-init \
+    -p 80:80 \
+    -v "$(pwd)/nginx/nginx.http.conf:/etc/nginx/nginx.conf:ro" \
+    -v "$(pwd)/certbot/www:/var/www/certbot:ro" \
+    nginx:alpine
 
   # Ждём пока nginx поднимется
-  sleep 5
+  sleep 3
 
   # Получаем сертификат
-    docker run --rm \
-      -v /var/www/remon/certbot/conf:/etc/letsencrypt \
-      -v /var/www/remon/certbot/www:/var/www/certbot \
-      certbot/certbot certonly \
-      --webroot \
-      --webroot-path=/var/www/certbot \
-      --email admin@raemon.ru \
-      --agree-tos \
-      --no-eff-email \
-      -d raemon.ru \
-      -d www.raemon.ru
+  docker run --rm \
+    -v "$(pwd)/certbot/conf:/etc/letsencrypt" \
+    -v "$(pwd)/certbot/www:/var/www/certbot" \
+    certbot/certbot certonly \
+    --webroot \
+    --webroot-path=/var/www/certbot \
+    --email admin@raemon.ru \
+    --agree-tos \
+    --no-eff-email \
+    -d raemon.ru \
+    -d www.raemon.ru
+
+  # Останавливаем временный nginx
+  docker stop nginx-certbot-init || true
 
   echo "✅ SSL-сертификат получен!"
 fi
