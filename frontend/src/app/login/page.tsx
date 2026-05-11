@@ -1,10 +1,14 @@
-'use client';
+﻿'use client';
 
-import React, { Suspense, useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+
+const TelegramLoginButton = dynamic(() => import('@/components/TelegramLoginButton'), { ssr: false });
+
 // SVG-иконки OAuth-провайдеров
 function VkIcon() {
   return (
@@ -23,14 +27,6 @@ function YandexIcon() {
   );
 }
 
-function TelegramIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="12" fill="#29B6F6"/>
-      <path d="M17.472 6.28L5.28 10.9c-.83.33-.82.79-.15 1l3.13.98 1.2 3.73c.16.44.31.61.64.61.26 0 .38-.12.53-.27l1.6-1.55 3.33 2.46c.61.34 1.05.16 1.2-.57l2.17-10.22c.22-.88-.33-1.28-.99-.97z" fill="white"/>
-    </svg>
-  );
-}
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function LoginPage() {
@@ -41,7 +37,8 @@ export default function LoginPage() {
   );
 }
 
-function LoginPageInner() {  const [email, setEmail] = useState('');
+function LoginPageInner() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -73,14 +70,15 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
       }).catch(() => {
         setError('Ошибка при входе через OAuth');
       });
-    }  }, [searchParams, loginWithToken, router]);
+    }
+  }, [searchParams, loginWithToken, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       const result = await login(email, password);
-      // Редирект на /admin для администраторов, иначе в личный кабинет
       if (result?.role === 'admin') {
         router.push('/admin');
       } else {
@@ -92,9 +90,9 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
       setLoading(false);
     }
   };
+
   return (
     <main className="min-h-screen flex bg-white">
-      {/* Left — image */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
         <img
           src="/photos/Вид дома 2.jpg"
@@ -119,7 +117,6 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
         </div>
       </div>
 
-      {/* Right — form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16">
         <div className="w-full max-w-md">
           <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-remon-red text-sm font-semibold mb-10 transition-colors">
@@ -187,6 +184,7 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
               </label>
               <Link href="/forgot-password" className="text-remon-red font-bold hover:underline">Забыли пароль?</Link>
             </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -196,14 +194,12 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-8 flex items-center gap-4">
             <div className="flex-1 h-px bg-gray-100" />
             <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">или войти через</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
 
-          {/* OAuth */}
           <div className="grid grid-cols-3 gap-3">
             <a
               href={`${API_URL}/api/auth/vk`}
@@ -220,7 +216,9 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
               <YandexIcon />
             </a>
             <TelegramLoginButton apiUrl={API_URL} />
-          </div>          <p className="text-center text-gray-400 text-sm mt-10">
+          </div>
+
+          <p className="text-center text-gray-400 text-sm mt-10">
             Ещё не стали нашим клиентом?{' '}
             <Link href="/register" className="text-remon-red font-black hover:underline">
               Зарегистрироваться
@@ -230,109 +228,5 @@ function LoginPageInner() {  const [email, setEmail] = useState('');
         </div>
       </div>
     </main>
-  );
-}
-
-// Telegram Login Widget — виджет поверх нашей иконки
-function TelegramLoginButton({ apiUrl }: { apiUrl: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const { loginWithToken } = useAuth();
-  const [error, setError] = useState('');
-  const [widgetLoaded, setWidgetLoaded] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME;
-
-  // Предотвращаем hydration mismatch — рендерим виджет только на клиенте
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || !botName || !containerRef.current) return;
-    // Уже встроен
-    if (containerRef.current.childElementCount > 0) return;
-    // Глобальный callback, который вызывает Telegram Widget после авторизации
-    (window as unknown as Record<string, unknown>).onTelegramAuth = async (tgUser: Record<string, string>) => {
-      try {
-        const res = await fetch(`${apiUrl}/api/auth/telegram`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tgUser),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Ошибка Telegram' }));
-          setError(err.error || 'Ошибка авторизации через Telegram');
-          return;
-        }
-        const data = await res.json();
-        await loginWithToken(data.accessToken, data.refreshToken);
-        if (data.user?.role === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/cabinet');
-        }
-      } catch {
-        setError('Ошибка соединения с сервером');
-      }
-    };
-
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', botName);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.setAttribute('data-request-access', 'write');
-    script.async = true;
-    script.onload = () => setWidgetLoaded(true);
-    containerRef.current.appendChild(script);
-
-    return () => {
-      delete (window as unknown as Record<string, unknown>).onTelegramAuth;
-    };
-  }, [mounted, apiUrl, botName, loginWithToken, router]);
-
-  // До монтирования на клиенте — статичная заглушка (избегаем hydration mismatch)
-  if (!mounted) {
-    return (
-      <div className="flex items-center justify-center py-3 border border-gray-100 rounded-xl">
-        <TelegramIcon />
-      </div>
-    );
-  }
-
-  // Если имя бота не задано — показываем заглушку
-  if (!botName) {    return (
-      <div
-        className="flex items-center justify-center py-3 border border-gray-100 rounded-xl opacity-40 cursor-not-allowed"
-        title="Telegram не настроен"
-      >
-        <TelegramIcon />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center col-span-1">
-      {/* Кнопка: наша иконка видна всегда, виджет поверх неё прозрачный */}
-      <div
-        className="relative flex items-center justify-center w-full py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all overflow-hidden cursor-pointer"
-        style={{ minHeight: 48 }}
-        title="Войти через Telegram"
-      >
-        {/* Иконка — всегда видна */}
-        <span className="pointer-events-none z-10 flex items-center justify-center">
-          <TelegramIcon />
-        </span>
-        {/* Виджет Telegram — прозрачный, поверх для клика */}
-        <div
-          ref={containerRef}
-          className="absolute inset-0 flex items-center justify-center overflow-hidden"
-          style={{ opacity: widgetLoaded ? 0.01 : 0 }}
-        />
-      </div>
-      {error && <p className="text-red-500 text-xs mt-1 text-center">{error}</p>}
-    </div>
   );
 }
