@@ -26,31 +26,30 @@ if [ ! -f "certbot/conf/live/raemon.ru/fullchain.pem" ]; then
   # Останавливаем всё что могло остаться с прошлого запуска
   docker compose -f docker-compose.prod.yml down 2>/dev/null || true
 
-  # Подменяем nginx.conf на HTTP-only версию (без SSL — сертификатов ещё нет)
-  cp nginx/nginx.conf nginx/nginx.conf.bak
-  cp nginx/nginx.http.conf nginx/nginx.conf
+  # Убиваем всё что может занимать порт 80
+  docker ps -q | xargs -r docker stop 2>/dev/null || true
 
-  # Запускаем только nginx (он теперь без SSL — стартует нормально)
-  docker compose -f docker-compose.prod.yml up -d nginx
+  # Запускаем временный nginx напрямую (без compose-зависимостей)
+  # Используем HTTP-only конфиг — без SSL, сертификатов ещё нет
+  echo "⏳ Запускаем временный nginx для получения сертификата..."
+  docker run -d --name nginx-certbot-tmp \
+    -p 80:80 \
+    -v "$(pwd)/nginx/nginx.http.conf:/etc/nginx/nginx.conf:ro" \
+    -v "$(pwd)/certbot/www:/var/www/certbot:ro" \
+    nginx:alpine
 
-  # Ждём пока nginx поднимется и начнёт слушать порт 80
-  echo "⏳ Ждём запуска nginx..."
-  sleep 5
-
-  # Проверяем статус контейнеров
-  echo "📊 Статус контейнеров:"
-  docker compose -f docker-compose.prod.yml ps
-
-  # Проверяем логи nginx
-  echo "📝 Логи nginx:"
-  docker compose -f docker-compose.prod.yml logs nginx
+  # Ждём пока nginx поднимется
+  sleep 3
 
   # Проверяем что nginx слушает порт 80
   echo "🔍 Проверяем доступность порта 80..."
-  if ! curl -s --max-time 5 http://localhost/.well-known/acme-challenge/test > /dev/null 2>&1; then
-    echo "⚠️  Порт 80 не отвечает"
+  if ! curl -sf --max-time 10 http://localhost/ > /dev/null 2>&1; then
+    echo "❌ Nginx не отвечает на порту 80. Логи:"
+    docker logs nginx-certbot-tmp
+    docker rm -f nginx-certbot-tmp 2>/dev/null || true
     exit 1
   fi
+  echo "✅ Nginx слушает порт 80"
 
   # Получаем сертификат через webroot
   docker run --rm \
@@ -65,12 +64,8 @@ if [ ! -f "certbot/conf/live/raemon.ru/fullchain.pem" ]; then
     -d raemon.ru \
     -d www.raemon.ru
 
-  # Восстанавливаем полный nginx.conf с SSL
-  cp nginx/nginx.conf.bak nginx/nginx.conf
-  rm nginx/nginx.conf.bak
-
   # Останавливаем временный nginx
-  docker compose -f docker-compose.prod.yml down
+  docker rm -f nginx-certbot-tmp
 
   echo "✅ SSL-сертификат получен!"
 else
