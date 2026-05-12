@@ -19,8 +19,8 @@ fi
 # Создаём папки для certbot если не существуют
 mkdir -p certbot/conf certbot/www
 
-# Первый запуск: получаем SSL-сертификат
-if [ ! -d "certbot/conf/live/raemon.ru" ]; then
+# Проверяем наличие SSL-сертификата
+if [ ! -f "certbot/conf/live/raemon.ru/fullchain.pem" ]; then
   echo "🔐 Получаем SSL-сертификат Let's Encrypt..."
 
   # Останавливаем всё что могло остаться с прошлого запуска
@@ -73,6 +73,8 @@ if [ ! -d "certbot/conf/live/raemon.ru" ]; then
   docker compose -f docker-compose.prod.yml down
 
   echo "✅ SSL-сертификат получен!"
+else
+  echo "✅ SSL-сертификат уже существует"
 fi
 
 # Собираем и запускаем все сервисы
