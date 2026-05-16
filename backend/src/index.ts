@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
+import mistralWAF from './middleware/mistral-waf';
 import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import apartmentsRoutes from './routes/apartments';
@@ -15,8 +16,9 @@ import projectsRoutes from './routes/projects';
 import adminRoutes from './routes/admin';
 import debugRoutes from './routes/debug';
 import { seedUsers } from './seed';
-dotenv.config();
+import { sanitizeBody } from './utils/sanitize';
 
+dotenv.config();
 // Кластеризация: используем все CPU-ядра в production
 if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
   const numCPUs = os.cpus().length;
@@ -51,6 +53,12 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ─── MISTRAL Defense WAF ────────────────────────────────────────────────
+app.use(mistralWAF);
+
+// ─── DOMPurify Input Sanitization ────────────────────────────────────────
+app.use(sanitizeBody);
+
 // Rate limiting: 200 запросов за 15 минут с одного IP
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -69,9 +77,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Слишком много попыток входа, попробуйте через 15 минут' },
 });
+
 app.use('/api/', generalLimiter);
-// Публичные маршруты
-app.use('/api/auth', authLimiter, authRoutes);
+// Публичные маршрутыapp.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/apartments', apartmentsRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/projects', projectsRoutes);

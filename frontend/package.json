@@ -14,9 +14,9 @@
     "react-dom": "19.0.0",
     "lucide-react": "^0.469.0",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.5.5"
-  },
-  "devDependencies": {
+    "tailwind-merge": "^2.5.5",
+    "isomorphic-dompurify": "^2.16.0"
+  },  "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
