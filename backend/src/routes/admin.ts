@@ -1,7 +1,31 @@
-import { Router, Response } from 'express';
+import { Router, Response, Request } from 'express';
 import pool from '../db';
 import { authMiddleware, adminMiddleware, AuthRequest } from '../middleware/auth';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
+// ── Multer: загрузка медиа ────────────────────────────────────────────────────
+const uploadDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, uploadDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (_req, file, cb) => {
+    const allowed = /jpeg|jpg|png|gif|webp|mp4|mov|avi|webm/i;
+    if (allowed.test(path.extname(file.originalname))) cb(null, true);
+    else cb(new Error('Недопустимый тип файла'));
+  },
+});
 const router = Router();
 router.use(authMiddleware, adminMiddleware);
 
@@ -390,6 +414,47 @@ router.post('/messages/user/:userId/reply', async (req: AuthRequest, res: Respon
     console.error(err);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
+});
+
+// ===== МЕДИА =====
+
+// POST /api/admin/upload — загрузка файла
+router.post('/upload', upload.single('file'), (req: Request, res: Response): void => {
+  if (!req.file) { res.status(400).json({ error: 'Файл не загружен' }); return; }
+  const url = `/uploads/${req.file.filename}`;
+  res.json({ url, filename: req.file.filename, originalname: req.file.originalname, size: req.file.size });
+});
+
+// POST /api/admin/upload/multiple — загрузка нескольких файлов
+router.post('/upload/multiple', upload.array('files', 20), (req: Request, res: Response): void => {
+  const files = req.files as Express.Multer.File[];
+  if (!files || !files.length) { res.status(400).json({ error: 'Файлы не загружены' }); return; }
+  const result = files.map(f => ({ url: `/uploads/${f.filename}`, filename: f.filename, originalname: f.originalname, size: f.size }));
+  res.json(result);
+});
+
+// GET /api/admin/media — список всех загруженных файлов
+router.get('/media', (_req: Request, res: Response): void => {
+  try {
+    const files = fs.readdirSync(uploadDir).map(filename => {
+      const stat = fs.statSync(path.join(uploadDir, filename));
+      const ext = path.extname(filename).toLowerCase();
+      const isVideo = ['.mp4', '.mov', '.avi', '.webm'].includes(ext);
+      return { filename, url: `/uploads/${filename}`, size: stat.size, isVideo, createdAt: stat.birthtime };
+    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    res.json(files);
+  } catch (e) {
+    res.json([]);
+  }
+});
+
+// DELETE /api/admin/media/:filename — удаление файла
+router.delete('/media/:filename', (req: Request, res: Response): void => {
+  const filename = path.basename(req.params.filename);
+  const filepath = path.join(uploadDir, filename);
+  if (!fs.existsSync(filepath)) { res.status(404).json({ error: 'Файл не найден' }); return; }
+  fs.unlinkSync(filepath);
+  res.json({ ok: true });
 });
 
 // ===== СТАТИСТИКА =====

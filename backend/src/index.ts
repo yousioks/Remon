@@ -90,6 +90,9 @@ app.use('/api/users', usersRoutes);
 // Админ маршруты (требуют JWT + role=admin)
 app.use('/api/admin', adminRoutes);
 
+// Раздача загруженных медиафайлов
+import path from 'path';
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Уязвимый debug endpoint (без авторизации — намеренно, для диплома)
 app.use('/api/admin/debug', debugRoutes);
 

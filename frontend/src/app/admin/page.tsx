@@ -1060,9 +1060,150 @@ function ApartmentsManagement({ projects }: { projects: Project[] }) {
   );
 }
 
+// ─── Media Manager ──────────────────────────────────────────────────────────
+interface MediaFile { filename: string; url: string; size: number; isVideo: boolean; createdAt: string; }
+
+function MediaManager() {
+  const [files, setFiles] = useState<MediaFile[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [preview, setPreview] = useState<MediaFile | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+  const load = () => {
+    apiGet<MediaFile[]>('/api/admin/media').then(setFiles).catch(() => {});
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || []);
+    if (!selected.length) return;
+    setUploading(true);
+    const fd = new FormData();
+    selected.forEach(f => fd.append('files', f));
+    try {
+      const token = localStorage.getItem('accessToken');
+      const r = await fetch(`${API}/api/admin/upload/multiple`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });      if (r.ok) load();
+    } catch {}
+    setUploading(false);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const copyUrl = (url: string) => {
+    navigator.clipboard.writeText(`${API}${url}`);
+    setCopied(url);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const deleteFile = async (filename: string) => {
+    if (!confirm('Удалить файл?')) return;
+    try {
+      await apiDelete(`/api/admin/media/${filename}`);
+      setFiles(prev => prev.filter(f => f.filename !== filename));
+    } catch {}
+  };
+
+  const fmtSize = (b: number) => b > 1024*1024 ? `${(b/1024/1024).toFixed(1)} МБ` : `${(b/1024).toFixed(0)} КБ`;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black uppercase tracking-tighter">Медиатека</h2>
+        <button onClick={() => inputRef.current?.click()}
+          className="flex items-center gap-2 bg-remon-black text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-remon-red transition-colors">
+          <Plus size={16} /> {uploading ? 'Загрузка...' : 'Загрузить файлы'}
+        </button>
+        <input ref={inputRef} type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleUpload} />
+      </div>
+
+      {/* Drag & Drop зона */}
+      <div
+        className="border-2 border-dashed border-gray-200 rounded-3xl p-10 text-center cursor-pointer hover:border-remon-red transition-colors"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={e => e.preventDefault()}
+        onDrop={e => { e.preventDefault(); const dt = e.dataTransfer; if (dt.files.length) { const fake = { target: { files: dt.files } } as any; handleUpload(fake); } }}
+      >
+        <div className="text-4xl mb-3">📁</div>
+        <p className="font-bold text-gray-500">Перетащите фото или видео сюда</p>
+        <p className="text-sm text-gray-400 mt-1">JPG, PNG, GIF, WebP, MP4, MOV — до 50 МБ</p>
+      </div>
+
+      {/* Сетка файлов */}
+      {files.length === 0 ? (
+        <div className="text-center py-20 text-gray-400">Нет загруженных файлов</div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {files.map(f => (
+            <div key={f.filename} className="group relative bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              {/* Превью */}
+              <div className="aspect-square bg-gray-50 flex items-center justify-center cursor-pointer overflow-hidden"
+                onClick={() => setPreview(f)}>
+                {f.isVideo ? (
+                  <div className="flex flex-col items-center gap-2 text-gray-400">
+                    <span className="text-3xl">🎬</span>
+                    <span className="text-xs font-bold">Видео</span>
+                  </div>
+                ) : (
+                  <img src={`${API}${f.url}`} alt={f.filename}
+                    className="w-full h-full object-cover"
+                    onError={e => { (e.target as HTMLImageElement).src = '/placeholder.jpg'; }} />
+                )}
+              </div>
+              {/* Инфо */}
+              <div className="p-2">
+                <p className="text-[10px] text-gray-400 truncate">{f.filename}</p>
+                <p className="text-[10px] font-bold text-gray-500">{fmtSize(f.size)}</p>
+              </div>
+              {/* Кнопки */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button onClick={() => copyUrl(f.url)}
+                  className="w-7 h-7 bg-white rounded-lg shadow flex items-center justify-center text-xs hover:bg-green-50"
+                  title="Копировать URL">
+                  {copied === f.url ? '✓' : '🔗'}
+                </button>
+                <button onClick={() => deleteFile(f.filename)}
+                  className="w-7 h-7 bg-white rounded-lg shadow flex items-center justify-center hover:bg-red-50"
+                  title="Удалить">
+                  <Trash2 size={12} className="text-red-400" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Модальное превью */}
+      {preview && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setPreview(null)}>
+          <div className="max-w-4xl max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setPreview(null)}
+              className="absolute -top-10 right-0 text-white font-bold text-xl">✕</button>
+            {preview.isVideo ? (
+              <video src={`${API}${preview.url}`} controls className="max-h-[80vh] rounded-2xl" />
+            ) : (
+              <img src={`${API}${preview.url}`} alt={preview.filename}
+                className="max-h-[80vh] rounded-2xl object-contain" />
+            )}
+            <div className="mt-3 flex items-center gap-3">
+              <p className="text-white text-sm flex-1 truncate">{`${API}${preview.url}`}</p>
+              <button onClick={() => copyUrl(preview.url)}
+                className="bg-white text-black px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-100">
+                {copied === preview.url ? '✓ Скопировано' : 'Копировать URL'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Admin Page ────────────────────────────────────────────────────────
-type AdminTab = 'stats' | 'users' | 'projects' | 'apartments' | 'news' | 'cameras' | 'messages';
-export default function AdminPage() {
+type AdminTab = 'stats' | 'users' | 'projects' | 'apartments' | 'news' | 'cameras' | 'messages' | 'media';export default function AdminPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<AdminTab>('stats');
@@ -1089,8 +1230,8 @@ export default function AdminPage() {
     { key: 'news', label: 'Новости', icon: <Newspaper size={20} /> },
     { key: 'cameras', label: 'Камеры', icon: <Camera size={20} /> },
     { key: 'messages', label: 'Сообщения', icon: <MessageSquare size={20} /> },
+    { key: 'media', label: 'Медиа', icon: <Camera size={20} /> },
   ];
-
   const renderContent = () => {
     switch (tab) {
       case 'stats': return <StatsDashboard />;
@@ -1100,9 +1241,9 @@ export default function AdminPage() {
       case 'news': return <NewsManagement projects={projects} />;
       case 'cameras': return <CamerasManagement projects={projects} />;
       case 'messages': return <MessagesManagement />;
+      case 'media': return <MediaManager />;
     }
-  };
-  return (
+  };  return (
     <div className="flex h-screen bg-[#f8f9fa] overflow-hidden">
       {/* Sidebar */}
       <aside className={`

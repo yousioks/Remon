@@ -227,7 +227,7 @@ function FAQ() {
 const projects = [
   { name: 'Кварталы Карбышева', city: 'Омск', tag: 'Business', img: '/photos/Вид дома 1.jpg', price: 'от 5.5 млн ₽', deadline: 'II кв. 2026' },
   { name: 'Riverside HQ', city: 'Тюмень', tag: 'Business', img: '/photos/Вид дома 3.jpg', price: 'от 8.2 млн ₽', deadline: 'Сдан' },
-  { name: 'Grand Park', city: 'Новосибирск', tag: 'Premium', img: '/photos/Вид дома 2.jpg', price: 'от 12.5 млн ₽', deadline: 'IV кв. 2025' },
+  { name: 'Grand Park', city: 'Новосибирск', tag: 'Premium', img: '/photos/Вид дома 2.jpg', price: 'от 12.5 млн ₽', deadline: 'IV кв. 2026' },
 ];
 
 const features = [
