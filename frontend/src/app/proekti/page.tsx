@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { ArrowRight, MapPin, Award, Calendar, CheckCircle } from 'lucide-react';
+import EditableMediaBlock from '@/components/EditableMediaBlock';
 
 const timeline = [
   {
@@ -101,10 +102,10 @@ export default function ProektiPage() {
       <Header />
 
       {/* Hero */}
-      <section className="relative h-[600px] flex items-center justify-center text-white overflow-hidden">
+      <section className="relative h-[600px] flex items-center justify-center text-white overflow-hidden group/hero">
         <div className="absolute inset-0">
-          <img src="/photos/Вид дома 1.jpg" className="w-full h-full object-cover" alt="Проекты Remon" />
-          <div className="absolute inset-0 bg-remon-black/75" />
+          <EditableMediaBlock blockId="proekti-hero" defaultUrl="/photos/Вид дома 1.jpg" className="w-full h-full" />
+          <div className="absolute inset-0 bg-remon-black/75 pointer-events-none" />
         </div>
         <div className="relative z-10 text-center max-w-4xl px-6 pt-20">
           <p className="text-remon-red text-xs font-black uppercase tracking-[0.4em] mb-6">Наши проекты</p>
@@ -148,8 +149,10 @@ export default function ProektiPage() {
                 className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${i % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}
               >
                 <div className={`relative h-[420px] rounded-[3rem] overflow-hidden ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
-                  <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute inset-0">
+                    <EditableMediaBlock blockId={`proekti-project-${i}`} defaultUrl={p.img} className="w-full h-full" />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
                   <div className="absolute top-6 left-6 flex gap-2">
                     <span className="bg-remon-black text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest">
                       {p.city}

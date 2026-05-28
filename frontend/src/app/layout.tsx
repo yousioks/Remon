@@ -3,6 +3,7 @@ import { Manrope, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import GlobalMediaBanner from '@/components/GlobalMediaBanner';
+import { PageBlocksProvider } from '@/components/PageBlocksProvider';
 
 const manrope = Manrope({
   subsets: ['cyrillic', 'latin'],
@@ -35,8 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru" className={`${manrope.variable} ${playfair.variable}`}>
       <body className="font-sans antialiased">
         <AuthProvider>
-          <GlobalMediaBanner />
-          {children}
+          <PageBlocksProvider>
+            <GlobalMediaBanner />
+            {children}
+          </PageBlocksProvider>
         </AuthProvider>
       </body>
     </html>

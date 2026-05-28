@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Pencil } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { usePageBlocks } from './PageBlocksProvider';
 
 export interface PageBlock {
   type: 'image' | 'video' | 'youtube' | 'vk' | 'rutube';
@@ -11,8 +12,6 @@ export interface EditableMediaBlockProps {
   blockId: string;
   defaultUrl: string;
   className?: string;
-  blocksConfig: Record<string, PageBlock>;
-  onEditRequest?: (blockId: string) => void;
   alt?: string;
 }
 
@@ -43,10 +42,11 @@ function parseUrl(url: string): { type: PageBlock['type'], parsedUrl: string } {
   return { type: 'image', parsedUrl: url };
 }
 
-export default function EditableMediaBlock({ blockId, defaultUrl, className = '', blocksConfig, onEditRequest, alt = 'media' }: EditableMediaBlockProps) {
+export default function EditableMediaBlock({ blockId, defaultUrl, className = '', alt = 'media' }: EditableMediaBlockProps) {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('edit') === 'true';
   const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const { blocksConfig, onEditRequest } = usePageBlocks();
 
   const block = blocksConfig[blockId];
   let finalUrl = block?.url || defaultUrl;

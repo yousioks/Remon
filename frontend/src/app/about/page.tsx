@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { ArrowRight, MapPin } from 'lucide-react';
+import EditableMediaBlock from '@/components/EditableMediaBlock';
 
 const timeline = [
   { year: '2017', title: 'Основание компании', desc: 'ООО «Ремон Девелопер» основан в Тюмени. Первый проект — ЖК «Заречный».' },
@@ -38,10 +39,10 @@ export default function AboutPage() {
       <Header />
 
       {/* Hero */}
-      <section className="relative h-[600px] flex items-center justify-center text-white overflow-hidden">
+      <section className="relative h-[600px] flex items-center justify-center text-white overflow-hidden group/hero">
         <div className="absolute inset-0">
-          <img src="/photos/Вид дома 6.jpg" className="w-full h-full object-cover" alt="About Remon" />
-          <div className="absolute inset-0 bg-remon-black/70" />
+          <EditableMediaBlock blockId="about-hero" defaultUrl="/photos/Вид дома 6.jpg" className="w-full h-full" />
+          <div className="absolute inset-0 bg-remon-black/70 pointer-events-none" />
         </div>
         <div className="relative z-10 text-center max-w-4xl px-6 pt-20">
           <p className="text-remon-red text-xs font-black uppercase tracking-[0.4em] mb-6">О компании</p>
@@ -93,10 +94,10 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <img src="/photos/Вид дома 2.jpg" className="rounded-3xl h-64 w-full object-cover" alt="History 1" />
-              <img src="/photos/Вид дома 3.jpg" className="rounded-3xl h-64 w-full object-cover mt-8" alt="History 2" />
-              <img src="/photos/Вид дома 4.jpg" className="rounded-3xl h-64 w-full object-cover" alt="History 3" />
-              <img src="/photos/Вид дома 5.jpg" className="rounded-3xl h-64 w-full object-cover mt-8" alt="History 4" />
+              <EditableMediaBlock blockId="about-history-1" defaultUrl="/photos/Вид дома 2.jpg" className="rounded-3xl h-64 w-full overflow-hidden" />
+              <EditableMediaBlock blockId="about-history-2" defaultUrl="/photos/Вид дома 3.jpg" className="rounded-3xl h-64 w-full overflow-hidden mt-8" />
+              <EditableMediaBlock blockId="about-history-3" defaultUrl="/photos/Вид дома 4.jpg" className="rounded-3xl h-64 w-full overflow-hidden" />
+              <EditableMediaBlock blockId="about-history-4" defaultUrl="/photos/Вид дома 5.jpg" className="rounded-3xl h-64 w-full overflow-hidden mt-8" />
             </div>
           </div>
         </div>
@@ -109,8 +110,8 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {projects.map((p, i) => (
               <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm group hover:shadow-xl transition-all">
-                <div className="h-64 overflow-hidden">
-                  <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.name} />
+                <div className="h-64 overflow-hidden relative">
+                  <EditableMediaBlock blockId={`about-project-${i}`} defaultUrl={p.img} className="w-full h-full" />
                 </div>
                 <div className="p-8">
                   <div className="flex items-center gap-2 text-remon-red font-bold text-sm mb-4 uppercase tracking-widest">

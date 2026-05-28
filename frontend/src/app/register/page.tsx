@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import EditableMediaBlock from '@/components/EditableMediaBlock';
 
 const TelegramLoginButton = dynamic(() => import('@/components/TelegramLoginButton'), { ssr: false });
 
@@ -57,13 +58,13 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen flex bg-white">
       {/* Left — image */}
-      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-        <img
-          src="/photos/Вид дома 4.jpg"
-          className="absolute inset-0 w-full h-full object-cover"
-          alt="Remon"
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden group/hero">
+        <EditableMediaBlock 
+          blockId="register-bg" 
+          defaultUrl="/photos/Вид дома 4.jpg" 
+          className="absolute inset-0 w-full h-full"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-remon-black/80 via-remon-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-remon-black/80 via-remon-black/40 to-transparent pointer-events-none" />
         <div className="absolute inset-0 flex flex-col justify-between p-16">
           <Link href="/" className="text-4xl font-black tracking-tighter uppercase text-white">
             REMON<span className="text-remon-red">.</span>
