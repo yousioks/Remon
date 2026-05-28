@@ -6,8 +6,20 @@ import fs from 'fs';
 const router = Router();
 const uploadDir = path.join(__dirname, '../../uploads');
 const settingsPath = path.join(uploadDir, 'global-media.json');
+const pageBlocksPath = path.join(uploadDir, 'page-blocks.json');
 
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const getPageBlocks = () => {
+  try {
+    if (fs.existsSync(pageBlocksPath)) {
+      return JSON.parse(fs.readFileSync(pageBlocksPath, 'utf-8'));
+    }
+  } catch (e) {
+    console.error('Error reading page-blocks.json:', e);
+  }
+  return {};
+};
 
 // Helper function to read settings
 const getSettings = () => {
@@ -47,6 +59,26 @@ router.delete('/global-media', authMiddleware, adminMiddleware, (req: AuthReques
   } catch (e) {
     console.error('Error deleting global-media.json:', e);
     res.status(500).json({ error: 'Ошибка сброса настроек' });
+  }
+});
+
+// GET /api/settings/page-blocks
+router.get('/page-blocks', (req: Request, res: Response) => {
+  res.json(getPageBlocks());
+});
+
+// POST /api/settings/page-blocks/:blockId (Admin only)
+router.post('/page-blocks/:blockId', authMiddleware, adminMiddleware, (req: AuthRequest, res: Response) => {
+  const { blockId } = req.params;
+  const { url, type } = req.body;
+  try {
+    const blocks = getPageBlocks();
+    blocks[blockId] = { url, type };
+    fs.writeFileSync(pageBlocksPath, JSON.stringify(blocks, null, 2));
+    res.json({ success: true, block: blocks[blockId] });
+  } catch (e) {
+    console.error('Error writing page-blocks.json:', e);
+    res.status(500).json({ error: 'Ошибка сохранения блоков' });
   }
 });
 
