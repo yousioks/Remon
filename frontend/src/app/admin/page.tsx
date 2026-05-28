@@ -397,6 +397,73 @@ function UserApartmentsModal({ user, projects, onClose }: { user: AdminUser; pro
   );
 }
 
+// ─── Media Selector Components ────────────────────────────────────────────────
+function MediaSelectorModal({ onSelect, onClose }: { onSelect: (url: string) => void, onClose: () => void }) {
+  const [files, setFiles] = useState<{ filename: string; url: string; size: number; isVideo: boolean; createdAt: string }[]>([]);
+  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+  useEffect(() => {
+    apiGet<any[]>('/api/admin/media').then(setFiles).catch(() => {});
+  }, []);
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h3 className="text-xl font-black uppercase tracking-tighter">Выберите медиа</h3>
+          <button onClick={onClose} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto flex-1 bg-gray-50">
+          {files.length === 0 ? (
+            <div className="text-center py-20 text-gray-400 font-medium">Нет загруженных файлов. Сначала загрузите их в разделе "Медиатека".</div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+              {files.map(f => (
+                <div key={f.filename} className="group relative bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                     onClick={() => onSelect(`/uploads/${f.filename}`)}>
+                  <div className="aspect-square flex items-center justify-center bg-gray-50">
+                    {f.isVideo ? (
+                      <div className="flex flex-col items-center gap-2 text-gray-400"><span className="text-3xl">🎬</span></div>
+                    ) : (
+                      <img src={`${API}${f.url}`} alt={f.filename} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <div className="p-2 truncate text-[10px] text-gray-500 font-bold text-center">
+                    {f.filename}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImageInput({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) {
+  const [showModal, setShowModal] = useState(false);
+  return (
+    <div>
+      <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{label}</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className="flex-1 bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
+        />
+        <button onClick={() => setShowModal(true)} type="button" className="px-4 bg-remon-black text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-remon-red transition-colors whitespace-nowrap">
+          Галерея
+        </button>
+      </div>
+      {showModal && <MediaSelectorModal onSelect={(url) => { onChange(url); setShowModal(false); }} onClose={() => setShowModal(false)} />}
+    </div>
+  );
+}
+
 // ─── News Management ────────────────────────────────────────────────────────
 function NewsManagement({ projects }: { projects: Project[] }) {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -440,16 +507,22 @@ function NewsManagement({ projects }: { projects: Project[] }) {
           {[
             { label: 'Заголовок', key: 'title' as const, type: 'text' },
             { label: 'Краткое описание', key: 'excerpt' as const, type: 'text' },
-            { label: 'URL изображения', key: 'image_url' as const, type: 'text' },
+            { label: 'URL изображения', key: 'image_url' as const, type: 'text', isMedia: true },
           ].map(f => (
             <div key={f.key}>
-              <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
-              <input
-                type={f.type}
-                value={(editing[f.key] as string) || ''}
-                onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
-              />
+              {f.isMedia ? (
+                <ImageInput label={f.label} value={(editing[f.key] as string) || ''} onChange={v => setEditing(prev => ({ ...prev, [f.key]: v }))} />
+              ) : (
+                <>
+                  <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
+                  <input
+                    type={f.type}
+                    value={(editing[f.key] as string) || ''}
+                    onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
+                  />
+                </>
+              )}
             </div>
           ))}
           <div>
@@ -581,18 +654,24 @@ function CamerasManagement({ projects }: { projects: Project[] }) {
           </div>
           {[
             { label: 'Название', key: 'name' as const },
-            { label: 'URL потока', key: 'stream_url' as const },
-            { label: 'URL превью', key: 'thumbnail_url' as const },
+            { label: 'URL потока', key: 'stream_url' as const, isMedia: true },
+            { label: 'URL превью', key: 'thumbnail_url' as const, isMedia: true },
             { label: 'Расположение', key: 'location' as const },
           ].map(f => (
             <div key={f.key}>
-              <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
-              <input
-                type="text"
-                value={(editing[f.key] as string) || ''}
-                onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
-              />
+              {f.isMedia ? (
+                <ImageInput label={f.label} value={(editing[f.key] as string) || ''} onChange={v => setEditing(prev => ({ ...prev, [f.key]: v }))} />
+              ) : (
+                <>
+                  <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
+                  <input
+                    type="text"
+                    value={(editing[f.key] as string) || ''}
+                    onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
+                  />
+                </>
+              )}
             </div>
           ))}
           <button onClick={save} className="w-full btn-primary py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">
@@ -779,17 +858,23 @@ function ProjectsManagement() {
             { label: 'Город', key: 'city' as const },
             { label: 'Класс (Комфорт / Бизнес / Премиум)', key: 'class' as const },
             { label: 'Адрес', key: 'address' as const },
-            { label: 'URL изображения', key: 'image_url' as const },
+            { label: 'URL изображения', key: 'image_url' as const, isMedia: true },
             { label: 'Срок сдачи', key: 'deadline' as const },
           ].map(f => (
             <div key={f.key}>
-              <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
-              <input
-                type="text"
-                value={(editing[f.key] as string) || ''}
-                onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
-              />
+              {f.isMedia ? (
+                <ImageInput label={f.label} value={(editing[f.key] as string) || ''} onChange={v => setEditing(prev => ({ ...prev, [f.key]: v }))} />
+              ) : (
+                <>
+                  <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
+                  <input
+                    type="text"
+                    value={(editing[f.key] as string) || ''}
+                    onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
+                  />
+                </>
+              )}
             </div>
           ))}
           <div className="grid grid-cols-2 gap-4">
@@ -926,17 +1011,23 @@ function ApartmentsManagement({ projects }: { projects: Project[] }) {
             { label: 'Название', key: 'title' as const },
             { label: 'Комнаты (1к / 2к / Студия)', key: 'rooms' as const },
             { label: 'Этаж', key: 'floor' as const },
-            { label: 'URL фото квартиры', key: 'image_url' as const },
-            { label: 'URL планировки', key: 'layout_url' as const },
+            { label: 'URL фото квартиры', key: 'image_url' as const, isMedia: true },
+            { label: 'URL планировки', key: 'layout_url' as const, isMedia: true },
           ].map(f => (
             <div key={f.key}>
-              <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
-              <input
-                type="text"
-                value={(editing[f.key] as string) || ''}
-                onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
-              />
+              {f.isMedia ? (
+                <ImageInput label={f.label} value={(editing[f.key] as string) || ''} onChange={v => setEditing(prev => ({ ...prev, [f.key]: v }))} />
+              ) : (
+                <>
+                  <label className="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">{f.label}</label>
+                  <input
+                    type="text"
+                    value={(editing[f.key] as string) || ''}
+                    onChange={e => setEditing(prev => ({ ...prev, [f.key]: e.target.value }))}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm font-medium outline-none focus:border-remon-red"
+                  />
+                </>
+              )}
             </div>
           ))}
           <div className="grid grid-cols-2 gap-4">
