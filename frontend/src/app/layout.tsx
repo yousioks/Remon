@@ -1,7 +1,20 @@
 import type { Metadata } from 'next';
+import { Manrope, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import GlobalMediaBanner from '@/components/GlobalMediaBanner';
+
+const manrope = Manrope({
+  subsets: ['cyrillic', 'latin'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['cyrillic', 'latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Remon Developer — Девелоперская компания | Новостройки Омска',
@@ -19,8 +32,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru">
-      <body>
+    <html lang="ru" className={`${manrope.variable} ${playfair.variable}`}>
+      <body className="font-sans antialiased">
         <AuthProvider>
           <GlobalMediaBanner />
           {children}

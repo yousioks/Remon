@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function GlobalMediaBanner() {
   const [media, setMedia] = useState<{ url: string; type: string } | null>(null);
@@ -32,11 +33,16 @@ export default function GlobalMediaBanner() {
           className="w-full h-auto max-h-[30vh] md:max-h-[50vh] object-cover"
         />
       ) : (
-        <img 
-          src={media.url} 
-          alt="Global Update" 
-          className="w-full h-auto max-h-[30vh] md:max-h-[50vh] object-cover"
-        />
+        <div className="relative w-full" style={{ height: '30vh' }}>
+          <Image 
+            src={media.url} 
+            alt="Global Update" 
+            fill
+            priority
+            className="object-cover md:max-h-[50vh]"
+            unoptimized
+          />
+        </div>
       )}
     </div>
   );

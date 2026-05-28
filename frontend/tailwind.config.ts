@@ -20,8 +20,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Manrope', 'sans-serif'],
-        serif: ['Playfair Display', 'serif'],
+        sans: ['var(--font-manrope)', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'serif'],
       },
     },
   },
