@@ -41,18 +41,22 @@ services:
     expose:
       - "5000"
     environment:
-      - PORT=${PORT}
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - PORT=${PORT:-5000}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://remon_user:remon_pass@db:5432/remon_db}
+      - JWT_SECRET=${JWT_SECRET:-remon_super_secret_jwt_key_2025}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-remon_refresh_secret_key_2025}
       - NODE_ENV=production
-      - FRONTEND_URL=${FRONTEND_URL}
-      - OAUTH_REDIRECT_BASE=${OAUTH_REDIRECT_BASE}
-      - VK_APP_ID=${VK_APP_ID}
-      - VK_APP_SECRET=${VK_APP_SECRET}
-      - YANDEX_CLIENT_ID=${YANDEX_CLIENT_ID}
-      - YANDEX_CLIENT_SECRET=${YANDEX_CLIENT_SECRET}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - FRONTEND_URL=${FRONTEND_URL:-https://raemon.ru}
+      - OAUTH_REDIRECT_BASE=${OAUTH_REDIRECT_BASE:-https://raemon.ru}
+      - VK_APP_ID=${VK_APP_ID:-}
+      - VK_APP_SECRET=${VK_APP_SECRET:-}
+      - YANDEX_CLIENT_ID=${YANDEX_CLIENT_ID:-}
+      - YANDEX_CLIENT_SECRET=${YANDEX_CLIENT_SECRET:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@raemon.ru}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - RESIDENT_EMAIL=${RESIDENT_EMAIL:-resident@raemon.ru}
+      - RESIDENT_PASSWORD=${RESIDENT_PASSWORD:-user123}
     depends_on:
       db:
         condition: service_healthy
