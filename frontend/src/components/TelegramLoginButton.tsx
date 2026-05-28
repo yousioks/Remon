@@ -26,10 +26,11 @@ export default function TelegramLoginButton({ action = 'login', title = 'Вой�
       href={`https://t.me/${botName}?start=${action}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all cursor-pointer"
+      className="flex items-center justify-center gap-3 w-full py-4 mt-4 bg-[#29B6F6] text-white rounded-xl font-black uppercase text-sm hover:bg-[#2096CC] transition-all cursor-pointer shadow-md hover:shadow-xl hover:-translate-y-1"
       title={title}
     >
       <TelegramIcon />
+      <span className="tracking-widest">{title}</span>
     </a>
   );
 }

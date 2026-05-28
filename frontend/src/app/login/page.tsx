@@ -202,21 +202,24 @@ function LoginPageInner() {
             <div className="flex-1 h-px bg-gray-100" />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <a
               href={`${API_URL}/api/auth/vk`}
               title="Войти через ВКонтакте"
-              className="flex items-center justify-center gap-2 py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all"
+              className="flex items-center justify-center py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all"
             >
               <VkIcon />
             </a>
             <a
               href={`${API_URL}/api/auth/yandex`}
               title="Войти через Яндекс"
-              className="flex items-center justify-center gap-2 py-3 border border-gray-100 rounded-xl hover:border-red-200 hover:bg-red-50 transition-all"
+              className="flex items-center justify-center py-3 border border-gray-100 rounded-xl hover:border-red-200 hover:bg-red-50 transition-all"
             >
               <YandexIcon />
             </a>
+          </div>
+
+          <div className="mt-3">
             <TelegramLoginButton action="login" title="Войти через Telegram" />
           </div>
 

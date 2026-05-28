@@ -199,7 +199,7 @@ export default function RegisterPage() {
             <div className="flex-1 h-px bg-gray-100" />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <a
               href={`${API_URL}/api/auth/vk`}
               title="Зарегистрироваться через ВКонтакте"
@@ -214,8 +214,9 @@ export default function RegisterPage() {
             >
               <YandexIcon />
             </a>
-            <TelegramLoginButton action="register" title="Зарегистрироваться через Telegram" />
           </div>
+
+          <TelegramLoginButton action="register" title="Зарегистрироваться через Telegram" />
         </div>
       </div>
     </main>
