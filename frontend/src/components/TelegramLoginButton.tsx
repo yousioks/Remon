@@ -14,92 +14,22 @@ function TelegramIcon() {
 }
 
 interface Props {
-  apiUrl: string;
-  /** Текст тултипа — разный для login и register */
+  action?: 'login' | 'register' | 'recover';
   title?: string;
 }
 
-export default function TelegramLoginButton({ apiUrl, title = 'Войти через Telegram' }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const { loginWithToken } = useAuth();
-  const [error, setError] = useState('');
-  const [widgetLoaded, setWidgetLoaded] = useState(false);
-
-  const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME;
-
-  useEffect(() => {
-    if (!botName || !containerRef.current) return;
-    // Уже встроен
-    if (containerRef.current.childElementCount > 0) return;
-
-    (window as unknown as Record<string, unknown>).onTelegramAuth = async (tgUser: Record<string, string>) => {
-      try {
-        const res = await fetch(`${apiUrl}/api/auth/telegram`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tgUser),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Ошибка Telegram' }));
-          setError(err.error || 'Ошибка авторизации через Telegram');
-          return;
-        }
-        const data = await res.json();
-        await loginWithToken(data.accessToken, data.refreshToken);
-        if (data.user?.role === 'admin') {
-          router.push('/admin');
-        } else {
-          router.push('/cabinet');
-        }
-      } catch {
-        setError('Ошибка соединения с сервером');
-      }
-    };
-
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', botName);
-    script.setAttribute('data-size', 'large');
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    script.setAttribute('data-request-access', 'write');
-    script.async = true;
-    script.onload = () => setWidgetLoaded(true);
-    containerRef.current.appendChild(script);
-
-    return () => {
-      delete (window as unknown as Record<string, unknown>).onTelegramAuth;
-    };
-  }, [apiUrl, botName, loginWithToken, router]);
-
-  if (!botName) {
-    return (
-      <div
-        className="flex items-center justify-center py-3 border border-gray-100 rounded-xl opacity-40 cursor-not-allowed"
-        title="Telegram не настроен"
-      >
-        <TelegramIcon />
-      </div>
-    );
-  }
+export default function TelegramLoginButton({ action = 'login', title = 'Войти через Telegram' }: Props) {
+  const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || 'RemonSecurityBot';
 
   return (
-    <div className="flex flex-col items-center col-span-1">
-      <div
-        className="relative flex items-center justify-center w-full py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all overflow-hidden cursor-pointer"
-        style={{ minHeight: 48 }}
-        title={title}
-      >
-        <span className="pointer-events-none z-10 flex items-center justify-center">
-          <TelegramIcon />
-        </span>
-        <div
-          ref={containerRef}
-          className="absolute inset-0 flex items-center justify-center overflow-hidden"
-          style={{ opacity: widgetLoaded ? 0.01 : 0 }}
-        />
-      </div>
-      {error && <p className="text-red-500 text-xs mt-1 text-center">{error}</p>}
-    </div>
+    <a
+      href={`https://t.me/${botName}?start=${action}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center py-3 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50 transition-all cursor-pointer"
+      title={title}
+    >
+      <TelegramIcon />
+    </a>
   );
 }

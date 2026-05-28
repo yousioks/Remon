@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const TelegramLoginButton = dynamic(() => import('@/components/TelegramLoginButton'), { ssr: false });
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -125,6 +128,18 @@ export default function ForgotPasswordPage() {
                   {loading ? 'Отправляем...' : 'Отправить ссылку'}
                 </button>
               </form>
+
+              <div className="my-8 flex items-center gap-4">
+                <div className="flex-1 h-px bg-gray-100" />
+                <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">или через</span>
+                <div className="flex-1 h-px bg-gray-100" />
+              </div>
+
+              <div className="flex justify-center w-full">
+                <div className="w-full">
+                  <TelegramLoginButton action="recover" title="Восстановить через Telegram" />
+                </div>
+              </div>
 
               <p className="text-center text-gray-400 text-sm mt-8">
                 Вспомнили пароль?{' '}

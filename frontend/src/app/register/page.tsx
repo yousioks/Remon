@@ -213,7 +213,7 @@ export default function RegisterPage() {
             >
               <YandexIcon />
             </a>
-            <TelegramLoginButton apiUrl={API_URL} title="Зарегистрироваться через Telegram" />
+            <TelegramLoginButton action="register" title="Зарегистрироваться через Telegram" />
           </div>
         </div>
       </div>

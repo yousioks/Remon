@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
@@ -215,7 +215,7 @@ function LoginPageInner() {
             >
               <YandexIcon />
             </a>
-            <TelegramLoginButton apiUrl={API_URL} />
+            <TelegramLoginButton action="login" title="Войти через Telegram" />
           </div>
 
           <p className="text-center text-gray-400 text-sm mt-10">
