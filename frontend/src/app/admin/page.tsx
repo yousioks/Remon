@@ -6,8 +6,9 @@ import Link from 'next/link';
 import {
   Users, Building2, Newspaper, Camera, MessageSquare,
   BarChart3, LogOut, Menu, X, Plus, Pencil, Trash2,
-  ChevronDown, Check, ArrowLeft, Send, Home
-} from 'lucide-react';import { useAuth } from '@/context/AuthContext';
+  ChevronDown, Check, ArrowLeft, Send, Home, MonitorPlay
+} from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import { apiGet, apiPost, apiPut, apiDelete } from '@/lib/api';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -1202,8 +1203,99 @@ function MediaManager() {
   );
 }
 
+// ─── Global Media Manager ───────────────────────────────────────────────────
+function GlobalMediaManager() {
+  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<'image' | 'video' | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+  useEffect(() => {
+    apiGet<{url: string, type: string}>('/api/settings/global-media')
+      .then(res => {
+        if (res.url) {
+          setMediaUrl(res.url);
+          setMediaType(res.type as any);
+        }
+      }).catch(() => {});
+  }, []);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const r = await fetch(`${API}/api/admin/upload`, {
+        method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
+      });
+      if (r.ok) {
+        const data = await r.json();
+        const isVideo = ['.mp4', '.mov', '.avi', '.webm'].includes(data.url.substring(data.url.lastIndexOf('.')).toLowerCase());
+        const type = isVideo ? 'video' : 'image';
+        
+        await apiPost('/api/settings/global-media', { url: data.url, type });
+        setMediaUrl(data.url);
+        setMediaType(type);
+      }
+    } catch {}
+    setUploading(false);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const removeMedia = async () => {
+    if (!confirm('Удалить глобальное медиа?')) return;
+    try {
+      await apiDelete('/api/settings/global-media');
+      setMediaUrl(null);
+      setMediaType(null);
+    } catch {}
+  };
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-black uppercase tracking-tighter">Глобальное медиа</h2>
+        <button onClick={() => inputRef.current?.click()}
+          className="flex items-center gap-2 bg-remon-black text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-remon-red transition-colors">
+          <Plus size={16} /> {uploading ? 'Загрузка...' : (mediaUrl ? 'Заменить' : 'Загрузить')}
+        </button>
+        <input ref={inputRef} type="file" accept="image/*,video/*" className="hidden" onChange={handleUpload} />
+      </div>
+
+      <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm space-y-4">
+        <p className="text-gray-500 text-sm">
+          Загруженное здесь фото или видео будет отображаться на всех страницах сайта в виде адаптивного баннера.
+        </p>
+
+        {mediaUrl ? (
+          <div className="relative rounded-2xl overflow-hidden border border-gray-200">
+            {mediaType === 'video' ? (
+              <video src={`${API}${mediaUrl}`} autoPlay loop muted className="w-full max-h-96 object-cover" />
+            ) : (
+              <img src={`${API}${mediaUrl}`} alt="Global Banner" className="w-full max-h-96 object-cover" />
+            )}
+            <button onClick={removeMedia}
+              className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded-xl shadow-lg hover:bg-red-600">
+              <Trash2 size={18} />
+            </button>
+          </div>
+        ) : (
+          <div className="border-2 border-dashed border-gray-200 rounded-3xl p-10 text-center text-gray-400">
+            Нет активного глобального медиа
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Admin Page ────────────────────────────────────────────────────────
-type AdminTab = 'stats' | 'users' | 'projects' | 'apartments' | 'news' | 'cameras' | 'messages' | 'media';export default function AdminPage() {
+type AdminTab = 'stats' | 'users' | 'projects' | 'apartments' | 'news' | 'cameras' | 'messages' | 'media' | 'global-media';
+export default function AdminPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<AdminTab>('stats');
@@ -1231,6 +1323,7 @@ type AdminTab = 'stats' | 'users' | 'projects' | 'apartments' | 'news' | 'camera
     { key: 'cameras', label: 'Камеры', icon: <Camera size={20} /> },
     { key: 'messages', label: 'Сообщения', icon: <MessageSquare size={20} /> },
     { key: 'media', label: 'Медиа', icon: <Camera size={20} /> },
+    { key: 'global-media', label: 'Глоб. Баннер', icon: <MonitorPlay size={20} /> },
   ];
   const renderContent = () => {
     switch (tab) {
@@ -1242,8 +1335,11 @@ type AdminTab = 'stats' | 'users' | 'projects' | 'apartments' | 'news' | 'camera
       case 'cameras': return <CamerasManagement projects={projects} />;
       case 'messages': return <MessagesManagement />;
       case 'media': return <MediaManager />;
+      case 'global-media': return <GlobalMediaManager />;
     }
-  };  return (
+  };
+
+  return (
     <div className="flex h-screen bg-[#f8f9fa] overflow-hidden">
       {/* Sidebar */}
       <aside className={`

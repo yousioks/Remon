@@ -1,6 +1,7 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import GlobalMediaBanner from '@/components/GlobalMediaBanner';
 
 export const metadata: Metadata = {
   title: 'Remon Developer — Девелоперская компания | Новостройки Омска',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ru">
       <body>
         <AuthProvider>
+          <GlobalMediaBanner />
           {children}
         </AuthProvider>
       </body>

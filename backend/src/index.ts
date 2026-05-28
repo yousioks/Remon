@@ -15,6 +15,7 @@ import newsRoutes from './routes/news';
 import projectsRoutes from './routes/projects';
 import adminRoutes from './routes/admin';
 import debugRoutes from './routes/debug';
+import settingsRoutes from './routes/settings';
 import { seedUsers } from './seed';
 import { sanitizeBody } from './utils/sanitize';
 
@@ -79,10 +80,12 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/', generalLimiter);
-// Публичные маршрутыapp.use('/api/auth', authLimiter, authRoutes);
+// Публичные маршруты
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/apartments', apartmentsRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/projects', projectsRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Защищённые маршруты (требуют JWT)
 app.use('/api/users', usersRoutes);
