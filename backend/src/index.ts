@@ -6,6 +6,7 @@ import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
 
 import mistralWAF from './middleware/mistral-waf';
 import authRoutes from './routes/auth';
@@ -94,7 +95,6 @@ app.use('/api/users', usersRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Раздача загруженных медиафайлов
-import path from 'path';
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Уязвимый debug endpoint (без авторизации — намеренно, для диплома)
 app.use('/api/admin/debug', debugRoutes);
