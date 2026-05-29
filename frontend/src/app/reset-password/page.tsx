@@ -4,6 +4,7 @@ import React, { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle } from 'lucide-react';
+import EditableMediaBlock from '@/components/EditableMediaBlock';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -85,10 +86,11 @@ function ResetPasswordInner() {
     <main className="min-h-screen flex bg-white">
       {/* Left — image */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-        <img
-          src="/photos/Вид дома 2.jpg"
-          className="absolute inset-0 w-full h-full object-cover"
-          alt="Remon"
+        <EditableMediaBlock 
+          blockId="reset-pass-bg" 
+          defaultUrl="/photos/Вид дома 2.jpg" 
+          className="absolute inset-0 w-full h-full" 
+          alt="Remon" 
         />
         <div className="absolute inset-0 bg-gradient-to-br from-remon-black/80 via-remon-black/40 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-between p-16">

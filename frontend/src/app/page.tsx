@@ -430,7 +430,7 @@ export default function HomePage() {
             {filteredProjects.map((p, i) => (
               <div key={i} className="reveal group cursor-pointer" style={{ transitionDelay: `${i * 0.15}s` }}>
                 <div className="project-card h-[420px] mb-6">
-                  <img src={p.img} className="w-full h-full object-cover" alt={p.name} />
+                  <EditableMediaBlock blockId={`project-img-${i}`} defaultUrl={p.img} className="w-full h-full" alt={p.name} />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-70 group-hover:opacity-95 transition-opacity" />
                   <div className="absolute top-6 left-6 flex gap-2 z-10">
                     <span className="bg-remon-black text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest">{p.tag}</span>
@@ -564,7 +564,7 @@ export default function HomePage() {
             ].map((n, i) => (
               <div key={i} className="bg-white rounded-3xl overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-500 reveal" style={{ transitionDelay: `${i * 0.15}s` }}>
                 <div className="h-52 overflow-hidden">
-                  <img src={n.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={n.title} />
+                  <EditableMediaBlock blockId={`news-img-${i}`} defaultUrl={n.img} className="w-full h-full group-hover:scale-110 transition-transform duration-700" alt={n.title} />
                 </div>
                 <div className="p-8">
                   <span className="text-[10px] font-black uppercase tracking-widest text-remon-red mb-3 block">{n.tag}</span>

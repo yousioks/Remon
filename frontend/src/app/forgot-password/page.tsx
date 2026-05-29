@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
+import EditableMediaBlock from '@/components/EditableMediaBlock';
 import dynamic from 'next/dynamic';
 
 const TelegramLoginButton = dynamic(() => import('@/components/TelegramLoginButton'), { ssr: false });
@@ -39,10 +40,11 @@ export default function ForgotPasswordPage() {
     <main className="min-h-screen flex bg-white">
       {/* Left — image */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-        <img
-          src="/photos/Вид дома 2.jpg"
-          className="absolute inset-0 w-full h-full object-cover"
-          alt="Remon"
+        <EditableMediaBlock 
+          blockId="forgot-pass-bg" 
+          defaultUrl="/photos/Вид дома 2.jpg" 
+          className="absolute inset-0 w-full h-full" 
+          alt="Remon" 
         />
         <div className="absolute inset-0 bg-gradient-to-br from-remon-black/80 via-remon-black/40 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-between p-16">
