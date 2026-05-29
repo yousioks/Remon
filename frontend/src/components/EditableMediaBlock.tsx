@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Pencil } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { usePageBlocks } from './PageBlocksProvider';
@@ -44,7 +44,7 @@ function parseUrl(url: string): { type: PageBlock['type'], parsedUrl: string } {
   return { type: 'image', parsedUrl: url };
 }
 
-export default function EditableMediaBlock({ blockId, defaultUrl, className = '', alt = 'media' }: EditableMediaBlockProps) {
+function EditableMediaBlockInner({ blockId, defaultUrl, className = '', alt = 'media' }: EditableMediaBlockProps) {
   const searchParams = useSearchParams();
   const isEditMode = searchParams.get('edit') === 'true';
   const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -97,5 +97,13 @@ export default function EditableMediaBlock({ blockId, defaultUrl, className = ''
         </div>
       )}
     </div>
+  );
+}
+
+export default function EditableMediaBlock(props: EditableMediaBlockProps) {
+  return (
+    <Suspense fallback={<div className={`w-full h-full ${props.className || ''}`} />}>
+      <EditableMediaBlockInner {...props} />
+    </Suspense>
   );
 }

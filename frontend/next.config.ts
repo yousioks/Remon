@@ -1,8 +1,15 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['images.unsplash.com', 'localhost'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'http', hostname: 'localhost' },
+    ],
+  },
+  turbopack: {
+    root: path.resolve(__dirname),
   },
 };
 
