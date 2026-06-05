@@ -137,7 +137,7 @@ VALUES (
   'admin@raemon.ru',
   '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lh3y',
   'Администратор Remon',
-  '+7 (3812) 20-30-40',
+  '+7 (933) 442-53-00',
   'admin',
   'resident_business'
 ) ON CONFLICT (email) DO NOTHING;

@@ -140,7 +140,7 @@ export default function MortgagePage() {
               <a href="#calculator" className="btn-primary px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest inline-flex items-center gap-3">
                 Рассчитать платёж <ArrowRight size={16} />
               </a>
-              <a href="tel:+73812203040" className="btn-outline border-white/30 text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:border-white inline-flex items-center gap-3">
+              <a href="tel:+79334425300" className="btn-outline border-white/30 text-white px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:border-white inline-flex items-center gap-3">
                 <Phone size={16} /> Позвонить
               </a>
             </div>

@@ -163,7 +163,7 @@ function TradeInCalc() {
               Рассчитать стоимость выкупа
             </button>
             <a
-              href="tel:+73812203040"
+              href="tel:+79334425300"
               className="flex-1 btn-outline py-4 rounded-xl font-black uppercase text-[10px] tracking-widest text-center"
             >
               Уточнить информацию
@@ -601,7 +601,7 @@ export default function HomePage() {
             <Link href="/kvartires" className="btn-primary px-12 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest inline-flex items-center gap-3">
               Смотреть квартиры <ArrowRight size={16} />
             </Link>
-            <a href="tel:+73812203040" className="btn-outline border-white/30 text-white px-12 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:border-white inline-flex items-center gap-3">
+            <a href="tel:+79334425300" className="btn-outline border-white/30 text-white px-12 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:border-white inline-flex items-center gap-3">
               <Phone size={16} /> Позвонить
             </a>
           </div>

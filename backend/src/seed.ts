@@ -27,7 +27,7 @@ export async function seedUsers(): Promise<void> {
       email: process.env.ADMIN_EMAIL || 'admin@raemon.ru',
       password: process.env.ADMIN_PASSWORD || 'admin123',
       full_name: 'Администратор Remon',
-      phone: '+7 (3812) 20-30-40',
+      phone: '+7 (933) 442-53-00',
       role: 'admin',
       status: 'resident_business',
     },

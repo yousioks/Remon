@@ -96,8 +96,8 @@ export default function Header() {
           <div className="flex items-center gap-4 md:gap-6">
             {/* Phone */}
             <div className="hidden xl:flex flex-col items-end text-black">
-              <a href="tel:+73812203040" className="text-base font-black hover:text-remon-red transition-colors">
-                +7 (3812) 20-30-40
+              <a href="tel:+79334425300" className="text-base font-black hover:text-remon-red transition-colors">
+                +7 (933) 442-53-00
               </a>
               <span className="text-[9px] uppercase font-bold opacity-50 tracking-widest">Заказать звонок</span>
             </div>
@@ -198,8 +198,8 @@ export default function Header() {
         </div>
         <div className="mt-16 border-t border-white/20 pt-8">
           <p className="text-sm font-bold text-gray-400 mb-2">Отдел продаж</p>
-          <a href="tel:+73812203040" className="text-2xl font-black hover:text-remon-red transition-colors">
-            +7 (3812) 20-30-40
+          <a href="tel:+79334425300" className="text-2xl font-black hover:text-remon-red transition-colors">
+            +7 (933) 442-53-00
           </a>
         </div>
       </div>

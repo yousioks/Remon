@@ -61,8 +61,8 @@ export default function Footer() {
             <h5 className="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em] mb-6">Контакты</h5>
             <div className="space-y-3 text-sm text-gray-400">
               <p>г. Омск, ул. Ленина, 10</p>
-              <a href="tel:+73812203040" className="block text-white font-black text-lg hover:text-remon-red transition-colors">
-                +7 (3812) 20-30-40
+              <a href="tel:+79334425300" className="block text-white font-black text-lg hover:text-remon-red transition-colors">
+                +7 (933) 442-53-00
               </a>
               <a href="mailto:info@raemon.ru" className="hover:text-white transition-colors">info@raemon.ru</a>
               <p className="text-xs text-gray-600">Пн–Пт: 9:00–20:00<br />Сб–Вс: 10:00–18:00</p>
@@ -71,7 +71,20 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
-          <p>© 2026 ООО «СЗ РЕМОН ДЕВЕЛОПМЕНТ». Все права защищены.</p>
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+            <p>© 2026 ООО «СЗ РЕМОН ДЕВЕЛОПМЕНТ». Все права защищены.</p>
+            <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-gray-500">
+              <span>powered by</span>
+              <a href="https://t.me/mrazevestate" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors underline decoration-remon-red decoration-2 underline-offset-4">
+                MRAZEV ESTATE
+              </a>
+              <span className="opacity-30">|</span>
+              <span>design by</span>
+              <a href="https://t.me/mrazevestate" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors underline decoration-remon-red decoration-2 underline-offset-4">
+                MRAZEV ESTATE
+              </a>
+            </div>
+          </div>
           <div className="flex gap-6">
             <Link href="#" className="hover:text-white transition-colors">Политика конфиденциальности</Link>
             <Link href="#" className="hover:text-white transition-colors">Публичная оферта</Link>
