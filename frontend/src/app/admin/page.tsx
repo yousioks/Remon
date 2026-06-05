@@ -1464,7 +1464,7 @@ export default function AdminPage() {
       case 'news': return <NewsManagement projects={projects} />;
       case 'cameras': return <CamerasManagement projects={projects} />;
       case 'messages': return <MessagesManagement />;
-      case 'media': return <MediaManagement />;
+      case 'media': return <MediaManager />;
       case 'global-media': return <GlobalMediaManager />;
       case 'visual-editor': return <VisualEditor />;
       default: return null;
