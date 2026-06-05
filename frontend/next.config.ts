@@ -8,8 +8,10 @@ const nextConfig: NextConfig = {
       { protocol: 'http', hostname: 'localhost' },
     ],
   },
-  turbopack: {
-    root: path.resolve(__dirname),
+  experimental: {
+    turbo: {
+      root: path.resolve(__dirname),
+    },
   },
 };
 
