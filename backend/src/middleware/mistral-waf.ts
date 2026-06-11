@@ -7,6 +7,35 @@ import crypto from 'crypto';
 const MISTRAL_SERVER_URL = process.env.MISTRAL_SERVER_URL || 'http://localhost:8080';
 const WAF_LOG_LEVEL = process.env.WAF_LOG_LEVEL || 'info';
 
+const bannedIps = new Set<string>();
+
+function updateBannedIps() {
+  try {
+    const url = new URL(`${MISTRAL_SERVER_URL}/api/quarantine?waf_ping=true&waf_host=raemon.ru`);
+    const client = url.protocol === 'https:' ? https : http;
+    client.get(url.toString(), (res) => {
+      let raw = '';
+      res.on('data', (chunk) => { raw += chunk; });
+      res.on('end', () => {
+        try {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) {
+            bannedIps.clear();
+            list.forEach((item: any) => {
+              if (item.ip) {
+                bannedIps.add(item.ip.replace(/^::ffff:/, '').trim());
+              }
+            });
+          }
+        } catch (_) {}
+      });
+    }).on('error', () => {});
+  } catch (_) {}
+}
+
+setInterval(updateBannedIps, 4000);
+updateBannedIps();
+
 // In-memory request counters for DDoS/brute-force detection
 const ipCounters: Record<string, { count: number; windowStart: number }> = {};
 const IP_WINDOW_MS = 60_000; // 1 minute
@@ -231,9 +260,32 @@ function checkSuspiciousActivity(req: Request): { detected: boolean; type: strin
 
 // ─── Main WAF Middleware ────────────────────────────────────────────────
 export function mistralWAF(req: Request, res: Response, next: NextFunction): void {
-  const ip = (req.ip || req.socket.remoteAddress || 'unknown').toString();
+  const ip = (req.ip || req.socket.remoteAddress || 'unknown').toString().replace(/^::ffff:/, '').trim();
   const path = req.path || req.url || '/';
   const method = req.method || 'GET';
+
+  // 0. Check if IP is in quarantine
+  if (bannedIps.has(ip)) {
+    console.error(`[MISTRAL-WAF] 🚫 Access blocked: IP ${ip} is in quarantine.`);
+    
+    // Report quarantined block to MISTRAL Server (low severity log registry)
+    reportAttack({
+      type: 'BLOCKED_REQUEST',
+      sourceIp: ip,
+      path,
+      method,
+      severity: 'LOW',
+      payload: `Доступ заблокирован для IP в карантине: ${ip}`,
+      details: { note: 'Blocked by WAF quarantine check' }
+    });
+
+    res.status(403).json({
+      error: 'Доступ заблокирован: Ваш IP-адрес находится в карантине MISTRAL Defense',
+      incident: 'IP_QUARANTINED',
+      timestamp: new Date().toISOString(),
+    });
+    return;
+  }
 
   // 1. Check attack patterns
   const attack = checkAttackPatterns(req);
