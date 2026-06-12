@@ -13,7 +13,8 @@ function updateBannedIps() {
   try {
     const url = new URL(`${MISTRAL_SERVER_URL}/api/quarantine?waf_ping=true&waf_host=raemon.ru`);
     const client = url.protocol === 'https:' ? https : http;
-    client.get(url.toString(), (res) => {
+    const options = url.protocol === 'https:' ? { rejectUnauthorized: false } : {};
+    client.get(url.toString(), options, (res) => {
       let raw = '';
       res.on('data', (chunk) => { raw += chunk; });
       res.on('end', () => {
@@ -37,7 +38,7 @@ setInterval(updateBannedIps, 4000);
 updateBannedIps();
 
 // In-memory request counters for DDoS/brute-force detection
-const ipCounters: Record<string, { count: number; windowStart: number }> = {};
+const ipCounters: Record<string, { count: number; windowStart: number; reported?: boolean }> = {};
 const IP_WINDOW_MS = 60_000; // 1 minute
 const IP_THRESHOLD = 300; // requests per minute
 const SUSPICIOUS_PATTERNS = [
@@ -101,7 +102,7 @@ async function reportAttack(data: {
     const payload = JSON.stringify(data);
     const url = new URL(`${MISTRAL_SERVER_URL}/api/attack-detected`);
     const client = url.protocol === 'https:' ? https : http;
-    const options = {
+    const options: any = {
       hostname: url.hostname,
       port: url.port || (url.protocol === 'https:' ? 443 : 80),
       path: url.pathname,
@@ -110,6 +111,7 @@ async function reportAttack(data: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
       },
+      rejectUnauthorized: false
     };
 
     const req = client.request(options, (res) => {      let data = '';
@@ -207,13 +209,14 @@ function checkAttackPatterns(req: Request): { detected: boolean; type: string; p
 function checkRateAnomaly(ip: string): { detected: boolean; type: string; severity: string; count: number } | null {
   const now = Date.now();
   if (!ipCounters[ip] || now - ipCounters[ip].windowStart > IP_WINDOW_MS) {
-    ipCounters[ip] = { count: 1, windowStart: now };
+    ipCounters[ip] = { count: 1, windowStart: now, reported: false };
     return null;
   }
 
   ipCounters[ip].count++;
 
-  if (ipCounters[ip].count > IP_THRESHOLD) {
+  if (ipCounters[ip].count > IP_THRESHOLD && !ipCounters[ip].reported) {
+    ipCounters[ip].reported = true;
     return {
       detected: true,
       type: 'DDOS_BRUTEFORCE',
