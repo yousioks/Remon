@@ -44,7 +44,7 @@ services:
       - "5000"
     environment:
       - PORT=5000
-      - DATABASE_URL=${DATABASE_URL:-postgresql://remon_user:remon_pass@db:5432/remon_db}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://${POSTGRES_USER:-remon_user}:${POSTGRES_PASSWORD:-remon_pass}@db:5432/${POSTGRES_DB:-remon_db}}
       - JWT_SECRET=${JWT_SECRET:-remon_super_secret_jwt_key_2025}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-remon_refresh_secret_key_2025}
       - NODE_ENV=production
