@@ -57,6 +57,9 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - RESIDENT_EMAIL=${RESIDENT_EMAIL:-resident@raemon.ru}
       - RESIDENT_PASSWORD=${RESIDENT_PASSWORD:-user123}
+      - MISTRAL_SERVER_URL=${MISTRAL_SERVER_URL:-http://host.docker.internal:8080}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy
