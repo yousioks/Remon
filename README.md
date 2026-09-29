@@ -9,6 +9,7 @@
 ![Express](https://img.shields.io/badge/Express-4.18-000000?style=for-the-badge&logo=express&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![OpenResty WAF](https://img.shields.io/badge/OpenResty-WAF%20Lua-red?style=for-the-badge&logo=nginx&logoColor=white)
+[![Security Pipeline](https://img.shields.io/github/actions/workflow/status/yousioks/remon/security.yml?label=DevSecOps%20Pipeline&logo=githubactions&logoColor=white&style=for-the-badge)](https://github.com/yousioks/remon/actions/workflows/security.yml)
 
 **Полнофункциональный веб-портал строительно-девелоперской компании и личный кабинет жильцов, интегрированный с полигоном тестирования кибератак (Cyber Range) и сенсорами MISTRAL WAF.**
 
